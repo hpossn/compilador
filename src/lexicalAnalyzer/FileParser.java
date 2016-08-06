@@ -15,6 +15,9 @@ public class FileParser {
 	private int lineChar;
 	
 	public static final int END_OF_LINE = '\n';
+	public static final int END_OF_LINE_WINDOWS = '\r';
+	public static final int TAB = '\t';
+	public static final int SPACE = ' ';
 	public static final int END_OF_FILE = 0;
 	
 	public FileParser(String fileName) throws FileNotFoundException {

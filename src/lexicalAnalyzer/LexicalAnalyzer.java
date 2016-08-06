@@ -91,7 +91,7 @@ public class LexicalAnalyzer {
 		eventQueue.removeHead();
 		
 		if(trackSwitch)
-			System.out.println("Read Char");
+			System.out.print("Read Char: ");
 		
 		char ch = fileParser.getNextChar();	
 		
@@ -99,6 +99,7 @@ public class LexicalAnalyzer {
 		case FileParser.END_OF_FILE:
 			return;
 		case FileParser.END_OF_LINE:
+		case FileParser.END_OF_LINE_WINDOWS:
 			createEvent(EventType.READ_LINE);
 			break;
 		default:
@@ -107,6 +108,36 @@ public class LexicalAnalyzer {
 		
 		readFile.append(ch);
 		
+		if(trackSwitch) {
+			String charInfo = getCharInfo(ch);				
+			System.out.println(charInfo);
+		}
+		
+	}
+	
+	private String getCharInfo(char ch) {
+		String info;
+		
+		switch(ch) {
+		case FileParser.END_OF_LINE:
+			info = "\\n";
+			break;
+		case FileParser.END_OF_LINE_WINDOWS:
+			info = "\\r";
+			break;
+		case FileParser.TAB:
+			info = "\\t";
+			break;
+		case FileParser.SPACE:
+			info = "\\space";
+			break;
+			default:
+				info = String.valueOf(ch);
+		}
+		
+		info = String.format("%8s --- ASCII (Hex): %2x", info, (int) ch);
+		
+		return info;
 	}
 	
 	private void processDefaultEvent() {
