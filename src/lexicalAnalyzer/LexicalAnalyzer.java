@@ -11,6 +11,8 @@ public class LexicalAnalyzer {
 	private final EventQueue eventQueue;
 	private final StringBuilder readFile;
 	
+	private final Transducer transducer;
+	
 	private boolean trackSwitch;
 
 	public LexicalAnalyzer(String fileName) throws FileNotFoundException {
@@ -18,19 +20,42 @@ public class LexicalAnalyzer {
 		eventQueue = new EventQueue();
 		readFile = new StringBuilder();
 		
+		transducer = new Transducer();
+		
 		trackSwitch = false;
 	}
 
 	private void createEvent(EventType eventType) {
 		eventQueue.addEvent(new Event(eventType));
 	}
-
-	public String printReadFile() {
-		createEvent(EventType.READ_FILE);
+	
+	public String getNumberedLinesFile() {
 		
+		StringBuilder lineNumberedFile = new StringBuilder();
+		
+		int lineNumber = 1;
+		
+		for(String eachLine : readFile.toString().split("\\n")) {
+			lineNumberedFile.append(lineNumber + " " + eachLine + "\n");
+			lineNumber++;
+		}
+		
+		return lineNumberedFile.toString();
+	}
+
+	public void readFile() {
+		createEvent(EventType.READ_FILE);
 		execute();
 		
-		return readFile.toString();
+		startTransducer();
+	}
+	
+	private void startTransducer() {
+		transducer.setFileContent(readFile.toString());
+	}
+	
+	public String getNextToken() {
+		return transducer.getNextToken();
 	}
 	
 	public void setTrackSwitch(boolean trackSwitch) {
@@ -83,8 +108,8 @@ public class LexicalAnalyzer {
 		if(trackSwitch)
 			System.out.println("Read Line");
 		
-		readFile.append(fileParser.getCurrentLineNumber() + " ");
-		
+		/*if(addLineNumbers)
+			readFile.append(fileParser.getCurrentLineNumber() + " ");*/
 	}
 
 	private void processReadCharacterEvent() {
@@ -131,8 +156,8 @@ public class LexicalAnalyzer {
 		case FileParser.SPACE:
 			info = "\\space";
 			break;
-			default:
-				info = String.valueOf(ch);
+		default:
+			info = String.valueOf(ch);
 		}
 		
 		info = String.format("%8s --- ASCII (Hex): %2x", info, (int) ch);

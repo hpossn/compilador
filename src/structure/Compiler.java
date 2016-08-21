@@ -11,9 +11,9 @@ public class Compiler {
 		printInitialMessage();
 		
 		// CHANGE TO DEFAULT
-		String fileName = getFileNameFromUser();
+		//String fileName = getFileNameFromUser();
 		//System.out.println();
-		//String fileName = "sourceFile.c";
+		String fileName = "test1.hposs";
 		
 		startCompilation(fileName);
 	}
@@ -45,9 +45,26 @@ public class Compiler {
 		}
 		
 		lexicalAnalyzer.setTrackSwitch(true);
-		String fileString = lexicalAnalyzer.printReadFile();
+		lexicalAnalyzer.readFile();
+		String fileString = lexicalAnalyzer.getNumberedLinesFile();
 		
 		System.out.println("\nArquivo lido:\n\n" + fileString);
+		
+		System.out.print("------------------------------------------------------------------------------------------------------------");
+		System.out.println("\nTokenizer");
+		System.out.println("------------------------------------------------------------------------------------------------------------\n");
+		
+		String token = "";
+		
+		while(!token.equals("EOF")) {
+			 token = lexicalAnalyzer.getNextToken();
+			 System.out.println("Token: " + token);
+		}
+		
+		/*for(int i = 0; i < 50; i++) {
+			token = lexicalAnalyzer.getNextToken();
+			System.out.println("Token: " + token);
+		}*/
 		
 	}
 }
