@@ -54,7 +54,7 @@ public class LexicalAnalyzer {
 		transducer.setFileContent(readFile.toString());
 	}
 	
-	public String getNextToken() {
+	public TokenPair getNextToken() {
 		return transducer.getNextToken();
 	}
 	

@@ -1,16 +1,17 @@
 PROGRAM prog1;
 
-VAR height : INT;
-VAR weight : INT;
+VAR height : INTEGER;
+VAR weight : INTEGER;
 VAR isEmpty : BOOLEAN;
 VAR name : STRING;
 VAR intVector : VECTOR[10..0];
 
 #Function declaration#
 
-FUNCTION multiplyArray(VECTOR[10..0] multiArray, int multiplier) ->
 
-            VAR count : int;
+FUNCTION multiplyArray(VECTOR[10..0] multiArray, INTEGER multiplier) ->
+
+            VAR count : INTEGER;
             count := 0;
 
             WHILE count < 11 DO:
@@ -35,6 +36,8 @@ BEGIN:
             intVector[10, 0] := 10; 
 
             intVector := multiplyArray(intVector, 3);
+            
+            print("value: ");
 
             print(intVector);
 END

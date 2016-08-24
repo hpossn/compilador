@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import lexicalAnalyzer.LexicalAnalyzer;
+import lexicalAnalyzer.TokenPair;
+import lexicalAnalyzer.TokenPair.TokenType;
 
 public class Compiler {
 	
@@ -54,11 +56,16 @@ public class Compiler {
 		System.out.println("\nTokenizer");
 		System.out.println("------------------------------------------------------------------------------------------------------------\n");
 		
-		String token = "";
+		boolean keepReading = true;
 		
-		while(!token.equals("EOF")) {
-			 token = lexicalAnalyzer.getNextToken();
-			 System.out.println("Token: " + token);
+		while(keepReading) {
+			 TokenPair token = lexicalAnalyzer.getNextToken();
+			 
+			 if(token.getTokenType() == TokenType.INVALID ||
+					 token.getTokenType() == TokenType.EOF)
+				 keepReading = false;
+			 
+			 System.out.println("Token: " + token.toString());
 		}
 		
 		/*for(int i = 0; i < 50; i++) {

@@ -1,6 +1,7 @@
 package lexicalAnalyzer;
 
 import automata.FiniteAutomata;
+import lexicalAnalyzer.TokenPair.TokenType;
 
 public class Transducer {
 	
@@ -9,12 +10,13 @@ public class Transducer {
 	private int currentIndex = 0;
 	private int maxIndex;
 	
-	FiniteAutomata automata;
+	private FiniteAutomata automata;
 	
+	private TokenClassifier classifier;
 	
 	public Transducer() {
-		
 		automata = new FiniteAutomata();
+		classifier = new TokenClassifier();
 	}
 	
 	public void setFileContent(String fileContent) {
@@ -26,27 +28,27 @@ public class Transducer {
 		return currentIndex >= maxIndex;
 	}
 	
-	public String getNextToken() {
+	public TokenPair getNextToken() {
 		if(isEOF())
-			return "EOF";
+			return makePair("EOF");
 		
 		StringBuilder buffer = new StringBuilder();
-		boolean invalid = false;
+		
 		boolean continua = true;
 		
 		while(continua) {
 			char ch = getNextChar();
 			
-			if(ch == FileParser.END_OF_FILE) {
-				return buffer.toString();
-			}
+			if(ch == FileParser.END_OF_FILE)
+				return makePair(buffer.toString());
 				
 			int nextState = automata.makeTransition(ch);
 			
 			switch(nextState) {
 			
 			case FiniteAutomata.NO_TRANSITION:
-				invalid = true;
+				moveBackOne();
+				return makePair("invalid token");
 				
 			case FiniteAutomata.END_OF_TOKEN:
 				moveBackOne();
@@ -61,12 +63,17 @@ public class Transducer {
 
 		}
 		
-		if(invalid) 
-			return "invalid token";
-		
-		return buffer.toString();
+		return makePair(buffer.toString());
 	}
 	
+
+	
+	private TokenPair makePair(String token) {
+		TokenType tokenType = classifier.classify(token);
+		return new TokenPair(tokenType, token);
+	}
+
+
 	private void moveBackOne() {
 		if(currentIndex > 0)
 			currentIndex--;

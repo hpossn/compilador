@@ -354,6 +354,10 @@ public class FiniteAutomata {
 		stateTransitions = new ArrayList<>();
 
 		stateTransitions.add(new Tuple('"', 10));
+		
+		stateTransitions.add(new Tuple(' ', 9));
+		
+		stateTransitions.add(new Tuple(':', 9));
 
 		stateTransitions.add(new Tuple('0', 9));
 		stateTransitions.add(new Tuple('1', 9));
