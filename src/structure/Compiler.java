@@ -1,8 +1,11 @@
 package structure;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 
+import automata.PushDownTransitions;
+import automata.PushDownAutomata;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
@@ -10,14 +13,21 @@ import lexicalAnalyzer.TokenPair.TokenType;
 public class Compiler {
 	
 	public void initializeCompiler() {
-		printInitialMessage();
+		//printInitialMessage();
 		
 		// CHANGE TO DEFAULT
 		//String fileName = getFileNameFromUser();
 		//System.out.println();
 		String fileName = "test1.hposs";
 		
-		startCompilation(fileName);
+		//startCompilation(fileName);
+		
+		/*********************************/
+		PushDownTransitions transitions = new PushDownTransitions();
+		
+		List<PushDownAutomata> submachines = transitions.getSubMachines();
+
+		/*********************************/
 	}
 
 	private String getFileNameFromUser() {
@@ -67,11 +77,6 @@ public class Compiler {
 			 
 			 System.out.println("Token: " + token.toString());
 		}
-		
-		/*for(int i = 0; i < 50; i++) {
-			token = lexicalAnalyzer.getNextToken();
-			System.out.println("Token: " + token);
-		}*/
 		
 	}
 }
