@@ -50,6 +50,10 @@ public class LexicalAnalyzer {
 		startTransducer();
 	}
 	
+	public void resetAnalyzer() {
+		transducer.reset();
+	}
+	
 	private void startTransducer() {
 		transducer.setFileContent(readFile.toString());
 	}

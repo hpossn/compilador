@@ -5,15 +5,15 @@ import java.util.Objects;
 public class SubTuple {
 	
 	private final String nextSubMachine;
-	private final int startState;
+	private final int returnState;
 	
-	public SubTuple(String nextSubMachine, int storeState) {
+	public SubTuple(String nextSubMachine, int returnState) {
 		this.nextSubMachine = nextSubMachine;
-		this.startState = storeState;
+		this.returnState = returnState;
 	}
 	
-	public int getStartState() {
-		return startState;
+	public int getReturnState() {
+		return returnState;
 	}
 
 	public String getNextSubMachine() {
@@ -27,12 +27,12 @@ public class SubTuple {
 		
 		SubTuple tupla = (SubTuple) o;
 		
-		return this.nextSubMachine.equals(tupla.nextSubMachine) && this.startState == tupla.startState;
+		return this.nextSubMachine.equals(tupla.nextSubMachine) && this.returnState == tupla.returnState;
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(nextSubMachine, startState);
+		return Objects.hash(nextSubMachine, returnState);
 	}
 
 }

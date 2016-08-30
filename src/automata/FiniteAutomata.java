@@ -153,6 +153,9 @@ public class FiniteAutomata {
 		stateTransitions.add(new Tuple('+', 4));
 		stateTransitions.add(new Tuple('/', 4));
 		stateTransitions.add(new Tuple('*', 4));
+		stateTransitions.add(new Tuple('_', 4));
+		stateTransitions.add(new Tuple('$', 4));
+		
 		
 		stateTransitions.add(new Tuple(':', 5));
 		stateTransitions.add(new Tuple('<', 5));

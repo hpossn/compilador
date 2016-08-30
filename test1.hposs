@@ -1,7 +1,7 @@
 PROGRAM prog1;
 
-VAR height : INTEGER;
-VAR weight : INTEGER;
+VAR height : INT;
+VAR weight : INT;
 VAR isEmpty : BOOLEAN;
 VAR name : STRING;
 VAR intVector : VECTOR[10..0];
@@ -9,20 +9,19 @@ VAR intVector : VECTOR[10..0];
 #Function declaration#
 
 
-FUNCTION multiplyArray(VECTOR[10..0] multiArray, INTEGER multiplier) ->
-
-            VAR count : INTEGER;
+FUNCTION multiplyArray(VECTOR[10..0] multiArray, INT multiplier) ->
+            VAR count : INT;
             count := 0;
 
-            WHILE count < 11 DO:
-                multiArray[count, 0] := multiArray[count] * multiplier;
+            WHILE _count < 11 DO
+                multiArray[_count, 0] := _multiArray[_count, 0] * _multiplier;
             ENDWHILE
         
             RETURN multiArray;        
 
 ENDFUNC
 
-BEGIN:
+BEGIN
             intVector[0, 0] := 0; 
             intVector[1, 0] := 1; 
             intVector[2, 0] := 2; 
@@ -35,10 +34,13 @@ BEGIN:
             intVector[9, 0] := 9; 
             intVector[10, 0] := 10; 
 
-            intVector := multiplyArray(intVector, 3);
+            intVector := _multiplyArray[_intVector, 3];
             
-            print("value: ");
+            VAR value : STRING;
+            value := $"value ";
+            
+            print value;
 
-            print(intVector);
+            print intVector;
 END
 

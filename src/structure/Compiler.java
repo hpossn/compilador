@@ -9,6 +9,7 @@ import automata.PushDownAutomata;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
+import syntaticalAnalyzer.SyntaticalAnalyzer;
 
 public class Compiler {
 	
@@ -20,14 +21,9 @@ public class Compiler {
 		//System.out.println();
 		String fileName = "test1.hposs";
 		
-		//startCompilation(fileName);
+		startCompilation(fileName);
 		
-		/*********************************/
-		PushDownTransitions transitions = new PushDownTransitions();
 		
-		List<PushDownAutomata> submachines = transitions.getSubMachines();
-
-		/*********************************/
 	}
 
 	private String getFileNameFromUser() {
@@ -77,6 +73,13 @@ public class Compiler {
 			 
 			 System.out.println("Token: " + token.toString());
 		}
+		
+		/*********************************/
+		
+		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer);
+		syntacticAnalyzer.recognize();
+
+		/*********************************/
 		
 	}
 }

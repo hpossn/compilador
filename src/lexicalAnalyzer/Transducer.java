@@ -28,6 +28,11 @@ public class Transducer {
 		return currentIndex >= maxIndex;
 	}
 	
+	public void reset() {
+		automata.reset();
+		currentIndex = 0;
+	}
+	
 	public TokenPair getNextToken() {
 		if(isEOF())
 			return makePair("EOF");

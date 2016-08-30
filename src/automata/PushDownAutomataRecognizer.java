@@ -26,25 +26,21 @@ public class PushDownAutomataRecognizer {
 		int machineIndex = 0;
 
 		int finalCounter = 0;
+		
+		String token = getNextToken();
 
 		while (acceptable && keepGoing) {
 			PushDownAutomata currentMachine = subMachines.get(machineIndex);
-			String token = lexicalAnalyzer.getNextToken().getValue();
 
 			String stackTop = "empty";
 			if (!stack.isEmpty())
 				stackTop = stack.top();
 
-			if (trace) {
-				System.out.println("Current sub-machine: " + currentMachine.getSubMachineName());
-				System.out.println("Current State: " + currentMachine.getCurrentState());
-				System.out.println("Stack top: " + stackTop);
-				System.out.println("Current token: " + token);
-			}
+			printCurrentInfo(token, currentMachine, stackTop);
 
 			String transition = currentMachine.findTransition(token);
 
-			boolean getNewToken = false;
+			boolean getNewToken = (!transition.contains(":") ? true : false);
 
 			if (transition.equals("NO_SUBMACHINE")) {
 				if (stack.isEmpty()) {
@@ -55,11 +51,11 @@ public class PushDownAutomataRecognizer {
 					stack.pop();
 
 					PushDownAutomata nextAut = null;
-					for (PushDownAutomata aut : subMachines) {
-						if (aut.getSubMachineName().equals(returnSubMachine)) {
-							nextAut = aut;
-						}
-					}
+					nextAut = getNextSubMachine(returnSubMachine, nextAut);
+					
+					if(currentMachine.getSubMachineName().equals("subID") ||
+							currentMachine.getSubMachineName().equals("subNum"))
+						token = getNextToken();
 
 					machineIndex = subMachines.indexOf(nextAut);
 					currentMachine = subMachines.get(machineIndex);
@@ -69,6 +65,9 @@ public class PushDownAutomataRecognizer {
 						System.out.println("SubMachine return " + returnSubMachine + " state " + returnState);
 
 				}
+			} else if (transition.equals("ERROR")) {
+				acceptable = false;
+				keepGoing = false;
 			} else {
 				if (getNewToken) {
 					if (trace)
@@ -76,7 +75,7 @@ public class PushDownAutomataRecognizer {
 								+ " -> " + transition);
 					
 					currentMachine.setCurrentState(Integer.parseInt(transition));
-					token = lexicalAnalyzer.getNextToken().getValue();
+					token = getNextToken();
 					
 				} else {
 					String[] subCallArray = transition.split(":");
@@ -89,16 +88,13 @@ public class PushDownAutomataRecognizer {
 
 					PushDownAutomata nextAut = null;
 					
-					for (PushDownAutomata aut : subMachines) {
-						if (aut.getSubMachineName().equals(nextMachine)) {
-							nextAut = aut;
-						}
-					}
+					nextAut = getNextSubMachine(nextMachine, nextAut);
 
 					machineIndex = subMachines.indexOf(nextAut);
-					stack.push(currentMachine.getSubMachineName() + ":" + currentMachine.getCurrentState());
+					stack.push(currentMachine.getSubMachineName() + ":" + subCallArray[1]);
 					currentMachine = subMachines.get(machineIndex);
 					currentMachine.resetState();
+
 				}
 			}
 
@@ -106,13 +102,17 @@ public class PushDownAutomataRecognizer {
 			// fitaEntrada.configuracao());
 
 			if (token.equals("EOF")) {
+				//System.out.println("\n finalCounter " + finalCounter + " acceptable " + acceptable + " stack " + stack.top() + " keepGoing: " + keepGoing);
 				if (finalCounter == 1) {
 					if (!stack.isEmpty())
 						acceptable = false;
-					else
+					else {
 						keepGoing = false;
+						acceptable = true;
+					}
 				} else if (stack.isEmpty())
 					keepGoing = false;
+					
 
 				finalCounter++;
 			}
@@ -121,8 +121,37 @@ public class PushDownAutomataRecognizer {
 		if (acceptable)
 			System.out.println("\n\nAccepted");
 		else
-			System.out.println("\n\nAccepted");
+			System.out.println("\n\nNot Accepted");
 
+	}
+
+	private String getNextToken() {
+		String token = lexicalAnalyzer.getNextToken().getValue();
+		
+		while(token.contains("#"))
+			token = lexicalAnalyzer.getNextToken().getValue();
+		
+		return token;
+	}
+
+	private void printCurrentInfo(String token, PushDownAutomata currentMachine, String stackTop) {
+		if (trace) {
+			System.out.println("\n");
+			System.out.println("Current sub-machine: " + currentMachine.getSubMachineName());
+			System.out.println("Current State: " + currentMachine.getCurrentState());
+			System.out.println("Stack top: " + stackTop);
+			System.out.println("Current token: " + token);
+		}
+	}
+
+	private PushDownAutomata getNextSubMachine(String nextMachine, PushDownAutomata nextAut) {
+		for (PushDownAutomata aut : subMachines) {
+			if (aut.getSubMachineName().equals(nextMachine)) {
+				nextAut = aut;
+				break;
+			}
+		}
+		return nextAut;
 	}
 
 }

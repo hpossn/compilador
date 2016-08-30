@@ -53,7 +53,7 @@ subMachine:subFuncdecl
 6,),7
 6,^,5
 7,->,8
-8,subfuncBlock,9
+8,subFuncBlock,9
 
 subMachine:subFuncBlock
 ENDFUNC,RETURN,;
@@ -74,9 +74,9 @@ subMachine:subVariable
 2
 1,subID,2
 2,[,3
-3,subNum,4
+3,subEB,4
 4,^,5
-5,subNum,6
+5,subEB,6
 6,],2
 
 
@@ -151,7 +151,7 @@ END
 2,END,3
 
 subMachine:subAssignment
-:=,TRUE,FALSE,"
+:=,TRUE,FALSE,$
 1
 5
 1,subVariable,2
@@ -159,9 +159,8 @@ subMachine:subAssignment
 3,subExpression,5
 3,TRUE,5
 3,FALSE,5
-3,",4
-4,subLetter,4
-4,",5
+3,$,4
+4,subID,5
 
 subMachine:subExpression
 -,+,/,*
@@ -177,25 +176,16 @@ subMachine:subExpression
 3,subEB,2
 
 subMachine:subEB
-(,),0,1,2,3,4,5,6,7,8,9,SUBCALL
+(,),0,1,2,3,4,5,6,7,8,9,SUBCALL,_
 1
 6
 1,(,2
-1,subVariable,6
+1,subNum,6
 1,SUBCALL,5
-1,0,4
-1,1,4
-1,2,4
-1,3,4
-1,4,4
-1,5,4
-1,6,4
-1,7,4
-1,8,4
-1,9,4
+1,_,4
 2,subExpression,3
 3,),6
-4,subNum,6
+4,subVariable,6
 5,subSubCall,6
 
 subMachine:subSubCall
