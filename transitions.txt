@@ -1,16 +1,18 @@
 subMachine:subProgram
-;,PROGRAM,^,VAR,FUNCTION
+;,PROGRAM,^,VAR,FUNCTION,BEGIN
 1
-8
+9
 1,PROGRAM,2
 2,subID,3
 3,;,5
 4,subVardecl,5
 5,VAR,4
 5,FUNCTION,6
+5,BEGIN,8
 6,subFuncdecl,7
 7,FUNCTION,6
-7,subComposite,8
+7,BEGIN,8
+8,subComposite,9
 
 subMachine:subVardecl
 :,;
@@ -94,11 +96,11 @@ VAR,GOTO,BEGIN,IF,WHILE,SUBCALL,READ,PRINT,;
 1,READ,9
 1,PRINT,9
 2,;,10
-3,subVardecl,2
+3,subVardecl,10
 4,subGoTo,2
 5,subComposite,2
-6,subConditional,2
-7,subLoop,2
+6,subConditional,10
+7,subLoop,10
 8,subSubCall,2
 9,subIO,2
 
@@ -109,11 +111,10 @@ subMachine:subGoTo
 1,subNum,2
 
 subMachine:subIO
-^,;
+^,
 1
-4
+2
 1,subVariable,2
-2,;,4
 2,^,3
 3,subVariable,2
 

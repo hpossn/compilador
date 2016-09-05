@@ -45,16 +45,19 @@ public class PushDownAutomataRecognizer {
 			if (transition.equals("NO_SUBMACHINE")) {
 				if (stack.isEmpty()) {
 					acceptable = false;
+				} else if(!currentMachine.isInFinalState() && !isDifferentTreatment(currentMachine)) {
+					acceptable = false;
+					keepGoing = false;
 				} else {
+
 					String returnSubMachine = stack.top().split(":")[0];
 					String returnState = stack.top().split(":")[1];
 					stack.pop();
 
 					PushDownAutomata nextAut = null;
 					nextAut = getNextSubMachine(returnSubMachine, nextAut);
-					
-					if(currentMachine.getSubMachineName().equals("subID") ||
-							currentMachine.getSubMachineName().equals("subNum"))
+
+					if (isDifferentTreatment(currentMachine))
 						token = getNextToken();
 
 					machineIndex = subMachines.indexOf(nextAut);
@@ -63,7 +66,6 @@ public class PushDownAutomataRecognizer {
 
 					if (trace)
 						System.out.println("SubMachine return " + returnSubMachine + " state " + returnState);
-
 				}
 			} else if (transition.equals("ERROR")) {
 				acceptable = false;
@@ -123,6 +125,13 @@ public class PushDownAutomataRecognizer {
 		else
 			System.out.println("\n\nNot Accepted");
 
+	}
+
+	private boolean isDifferentTreatment(PushDownAutomata currentMachine) {
+		boolean b = currentMachine.getSubMachineName().equals("subID") ||
+				currentMachine.getSubMachineName().equals("subNum");
+		
+		return b;
 	}
 
 	private String getNextToken() {

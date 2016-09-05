@@ -33,7 +33,7 @@ public class PushDownAutomata {
 	}
 	
 	public boolean isInFinalState() {
-		return finalStates.contains(currentState);
+		return finalStates.contains("" + currentState);
 	}
 	
 	public int getCurrentState() {

@@ -39,8 +39,9 @@ BEGIN
             VAR value : STRING;
             value := $"value ";
             
+            #bla#
+            
             print value;
 
-            print intVector;
-END
-
+            print intVector;        
+END 
