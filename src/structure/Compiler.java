@@ -10,6 +10,8 @@ import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
 import syntaticalAnalyzer.SyntaticalAnalyzer;
+import wirth.LexicalAnalyzerWirth;
+import wirth.SyntaticalAnalyzerWirth;
 
 public class Compiler {
 	
@@ -43,7 +45,7 @@ public class Compiler {
 	}
 
 	private void startCompilation(String fileName) {
-		LexicalAnalyzer lexicalAnalyzer = null;
+		/*LexicalAnalyzer lexicalAnalyzer = null;
 		
 		try {
 			lexicalAnalyzer = new LexicalAnalyzer(fileName);
@@ -74,12 +76,54 @@ public class Compiler {
 			 System.out.println("Token: " + token.toString());
 		}
 		
-		/*********************************/
+		##################
 		
 		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer);
 		syntacticAnalyzer.recognize();
-
-		/*********************************/
 		
+
+		###################*/
+		
+		
+		wirthAnalyzer();
+	
+	}
+
+	private void wirthAnalyzer() {
+		LexicalAnalyzerWirth lexicalAnalyzerWirth;
+		
+		try {
+			lexicalAnalyzerWirth = new LexicalAnalyzerWirth("grammar.txt");
+		} catch (FileNotFoundException e) {
+			System.out.println("ERRO: Arquivo fonte nao encontrado.");
+			System.exit(0);
+			return;
+		}
+		
+		lexicalAnalyzerWirth.setTrackSwitch(true);
+		lexicalAnalyzerWirth.readFile();
+		String fileString = lexicalAnalyzerWirth.getNumberedLinesFile();
+		
+		System.out.println("\nArquivo lido:\n\n" + fileString);
+		
+		System.out.print("------------------------------------------------------------------------------------------------------------");
+		System.out.println("\nTokenizer");
+		System.out.println("------------------------------------------------------------------------------------------------------------\n");
+		
+		boolean keepReading = true;
+		
+		while(keepReading) {
+			 TokenPair token = lexicalAnalyzerWirth.getNextToken();
+			 
+			 if(token.getTokenType() == TokenType.INVALID ||
+					 token.getTokenType() == TokenType.EOF)
+				 keepReading = false;
+			 
+			 System.out.println("Token: " + token.toString());
+		}
+		
+		SyntaticalAnalyzerWirth syntacticAnalyzerWirth = new SyntaticalAnalyzerWirth(lexicalAnalyzerWirth);
+		syntacticAnalyzerWirth.recognize();
+
 	}
 }

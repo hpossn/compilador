@@ -1,0 +1,28 @@
+Program = "PROGRAM" id ";" { Vardecl } { Funcdecl } Composite .
+Vardecl = "VAR" id ":" Type ";" .
+Type = "INT" | "STRING"| "BOOLEAN" | "VECTOR" Index. 
+Index = "[" num ".." num "]".
+Funcdecl = "FUNCTION" id "(" Type id { "," Type id } ")" "->"  funcBlock  .
+funcBlock = Command { Command } ["RETURN" Variable ";"] "ENDFUNC" .
+Composite = "BEGIN" Command { Command } "END" .
+Command = (Assignment | Vardecl | Subcall  | Goto | Composite | Conditional | Loop | Print | Read) ";" .
+Assignment = Variable ":=" (Expression | boolValue | """ {letter} """).
+Variable = id | id "[" num "," num "]" .
+Goto = "GOTO" num .
+Print = "PRINT" Variable {"," Variable} ";" .
+Read = "READ" Variable {"," Variable} ";" .
+Conditional = "IF" Expression Relation Expression "THEN" { Command }  [ "ELSE"  { Command } ]  "ENDIF".
+Loop = "WHILE" Expression Relation Expression "DO" { Command } "ENDWHILE".
+Expression = { "+" | "-" } Eb { ( "+" | "-" | "*" | "/" ) Eb } .
+Eb = ("(" Expression ")" | num | Variable | Subcall) .
+Relation = "==" | "!=" | "<" | "<=" | ">=" | ">" .
+Subcall = "SUBCALL" id "(" Expression { "," Expression } ")" .
+num = Digit { Digit } .
+Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
+id = Letter { Letter | Digit } .
+Letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" |
+              "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" .
+Comment = "#" {Letter | Digit} "#" .
+boolValue = "TRUE" | "FALSE" .
+ 
+ 
