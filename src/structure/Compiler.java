@@ -150,6 +150,8 @@ public class Compiler {
 			 System.out.println("Token: " + token.toString());
 		}
 		
+		lexicalAnalyzerWirth.resetAnalyzer();
+		
 		SyntaticalAnalyzerWirth syntacticAnalyzerWirth = new SyntaticalAnalyzerWirth(lexicalAnalyzerWirth);
 		syntacticAnalyzerWirth.recognize();
 
@@ -190,6 +192,10 @@ public class Compiler {
 				 System.out.println("Token: " + token.toString());
 			}
 		}
+		
+		System.out.println();
+		
+		lexicalAnalyzerWirth.resetAnalyzer();
 		
 		MakeAutomata automataMaker = new MakeAutomata(trace, lexicalAnalyzerWirth);
 		automataMaker.make();
