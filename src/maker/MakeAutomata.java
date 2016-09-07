@@ -1,5 +1,8 @@
 package maker;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +19,7 @@ public class MakeAutomata {
 	private boolean printStatusFlag;
 
 	private List<String> subMachine;
+	private List<String> allSubMachine;
 	private List<Pair> stack;
 
 	public MakeAutomata(boolean trace, LexicalAnalyzerWirth lexicalAnalyzerWirth) {
@@ -25,13 +29,16 @@ public class MakeAutomata {
 
 		subMachine = new ArrayList<>();
 		stack = new ArrayList<>();
+		allSubMachine = new ArrayList<>();
 	}
 
-	public void make() {
+	public void make(String outputFileName) {
 
 		boolean containSubMachine = true;
 
 		while (containSubMachine) {
+			
+			subMachine.clear();
 			
 			printStatusFlag = true;
 			
@@ -39,27 +46,32 @@ public class MakeAutomata {
 
 			int finalState = 1;
 			int state = 0;
-			int counter = 0;
+			int counter = 0;			
 
 			String transition;
+			
+			List<String> alphabet = new ArrayList<>();
 			
 			token = analyzer.getNextToken();
 			
 			if(token.getValue().equals("EOF")){
-				System.out.println("\n");
-				printSubMachine();
+				if(trace) {
+					System.out.println("\n");
+					printSubMachine(outputFileName);
+				}
 				return;
 			}
 
 			counter++;
 			writeHeader(token.getValue());
-			transition = addTransition(finalState, token.getValue(), POP_TRANSITION);
-			printStatus(token.getValue(), state, counter, transition);
-
+			//transition = addTransition(finalState, token.getValue(), POP_TRANSITION);
+			//if(trace) printStatus(token.getValue(), state, counter, transition);
+			if(trace) printStatus(token.getValue(), state, counter, "nenhuma");
+			
 			counter++;
 			token = analyzer.getNextToken();
 			push(state, finalState);
-			printStatus(token.getValue(), state, counter, "nenhuma");
+			if(trace) printStatus(token.getValue(), state, counter, "nenhuma");
 
 			boolean toDo = true;
 
@@ -79,7 +91,7 @@ public class MakeAutomata {
 					counter++;
 					push(state, state + 1);
 					transition = "nenhuma";
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					beginPar = true;
 					mostRecent = '(';
 					break;
@@ -87,13 +99,13 @@ public class MakeAutomata {
 					state = getSecondFromStack();
 					pop();
 					transition = addTransition(previous, "BLANK", state);
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					break;
 				case "|":
 					state = getFirstFromStack();
 					transition = addTransition(previous, "BLANK", getSecondFromStack());
 					beginPipe = true;
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					mostRecent = '|';
 					break;
 				case "[":
@@ -101,14 +113,14 @@ public class MakeAutomata {
 					transition = addTransition(state, "BLANK", counter);
 					push(state, counter);
 					counter++;
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					mostRecent = '[';
 					break;
 				case "]":
 					state = getSecondFromStack();
 					pop();
 					transition = addTransition(previous, "BLANK", state);
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					break;
 				case "{":
 					state = counter;
@@ -116,19 +128,19 @@ public class MakeAutomata {
 					beginCB = true;
 					push(state, state);
 					transition = addTransition(previous, "BLANK", state);
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					mostRecent = '{';
 					break;
 				case "}":
 					state = getSecondFromStack();
 					pop();
 					transition = addTransition(previous, "BLANK", state);
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					break;
 				case ".":
 					state = getSecondFromStack();
 					transition = addTransition(previous, "BLANK", state);
-					printStatus(token.getValue(), state, counter, transition);
+					if(trace) printStatus(token.getValue(), state, counter, transition);
 					break;
 				default:
 					counter++;
@@ -156,24 +168,63 @@ public class MakeAutomata {
 						state = counter - 1;
 						beginCB = false;
 					}
+					
+					String currentValue;
+					
+					if(token.getValue().contains("\"")) {
+						String temp = token.getValue().replace(',', '^');
+						if(temp.length() > 2)
+							temp = temp.substring(1, temp.length() - 1);
+						
+						if(!alphabet.contains(temp))
+							alphabet.add(temp);
+						
+						currentValue = token.getValue();
+					} else {
+						currentValue = "sub" + token.getValue();
+					}
 
-					transition = addTransition(previous, token.getValue(), state);
-					printStatus(token.getValue(), state, counter, transition);
+					transition = addTransition(previous, currentValue.replace(',',  '^'), state);
+					if(trace) printStatus(currentValue, state, counter, transition);
+					
+					
+					
 					break;
 
 				}
 
 				previous = state;
 				
-				if (token.getValue().equals(".")) {subMachine.add("\n"); break;}
+				if (token.getValue().equals(".")) {finalSubMachine(alphabet); break;}
+				
 			}
 
 		}
 		
 	}
 
+	private void finalSubMachine(List<String> alphabet) {
+		StringBuilder b = new StringBuilder();
+		alphabet.forEach(p -> b.append(p + ","));
+		
+		if(!alphabet.isEmpty()){
+			b.deleteCharAt(b.length() - 1);
+			subMachine.add(1, b.toString());
+		}
+		
+		subMachine.add("\n");
+		
+		
+		
+		for(String line : subMachine) {
+			allSubMachine.add(line);
+		}	
+		
+		
+	}
+
 	private void writeHeader(String name) {
-		subMachine.add("subMachine:" + name);
+		subMachine.add("subMachine:sub" + name);
 		subMachine.add(0 + ""); // Initial state 0
 		subMachine.add(1 + ""); // Final state 1
 	}
@@ -252,15 +303,25 @@ public class MakeAutomata {
 			return null;
 	}
 
-	private void printSubMachine() {
+	private void printSubMachine(String outputFileName) {
 		System.out.println("-------------------");
-		subMachine.forEach(System.out::println);
+		allSubMachine.forEach(System.out::println);
 		System.out.println("-------------------");
-	}
-
-	private void printStack() {
-		System.out.println("\nStack");
-		stack.forEach(System.out::println);
+		
+		try {
+			PrintWriter writer;
+			
+			writer = new PrintWriter(outputFileName, "UTF-8");
+			
+			allSubMachine.forEach(each -> writer.write(each + "\n"));
+			
+			writer.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("PROBLEM FOUND!");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

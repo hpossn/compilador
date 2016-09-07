@@ -198,7 +198,7 @@ public class Compiler {
 		lexicalAnalyzerWirth.resetAnalyzer();
 		
 		MakeAutomata automataMaker = new MakeAutomata(trace, lexicalAnalyzerWirth);
-		automataMaker.make();
+		automataMaker.make("automaticallyGenaratedAutomata.txt");
 		
 	}
 }
