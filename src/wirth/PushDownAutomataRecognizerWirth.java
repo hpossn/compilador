@@ -12,7 +12,7 @@ public class PushDownAutomataRecognizerWirth {
 	private List<PushDownAutomataWirth> subMachines;
 	private LexicalAnalyzerWirth lexicalAnalyzer;
 	
-	private boolean trace = true;
+	private boolean trace = false;
 
 	public PushDownAutomataRecognizerWirth(List<PushDownAutomataWirth> subMachines, LexicalAnalyzerWirth lexicalAnalyzerWirth) {
 		this.subMachines = subMachines;

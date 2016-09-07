@@ -6,7 +6,7 @@ subMachine:subGrammar
 2,=,3
 3,subExp,4
 4,.,5
-5,subNT,5
+5,subNT,2
 
 subMachine:subExp
 |,(,),{,},[,]

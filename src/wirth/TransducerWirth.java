@@ -105,8 +105,18 @@ public class TransducerWirth {
 		if(token.contains("\""))
 			return new TokenPair(TokenType.TERMINAL, token);
 		
-		if(token.length() == 1)
+		if(token.equals("|") ||
+				token.equals("{") ||
+				token.equals("}") ||
+				token.equals("(") ||
+				token.equals(")") ||
+				token.equals("[") ||
+				token.equals("]") ||
+				token.equals("."))
 			return new TokenPair(TokenType.SYMBOL, token);
+		
+		if(token.equals("="))
+			return new TokenPair(TokenType.ATRIBUTION, token);
 		
 		return new TokenPair(TokenType.NON_TERMINAL, token);
 	}

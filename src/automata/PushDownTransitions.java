@@ -15,9 +15,10 @@ public class PushDownTransitions {
 	
 	private List<PushDownAutomata> subMachines;
 	List<String> inputConfiguration;
-	private boolean trace = true;
+	private boolean trace;
 	
-	public PushDownTransitions(){
+	public PushDownTransitions(boolean trace){
+		this.trace = trace;
 		subMachines = new ArrayList<>(); 
 		
 		inputConfiguration = new ArrayList<String>();

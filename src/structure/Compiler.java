@@ -9,6 +9,7 @@ import automata.PushDownAutomata;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
+import maker.MakeAutomata;
 import syntaticalAnalyzer.SyntaticalAnalyzer;
 import wirth.LexicalAnalyzerWirth;
 import wirth.SyntaticalAnalyzerWirth;
@@ -16,36 +17,67 @@ import wirth.SyntaticalAnalyzerWirth;
 public class Compiler {
 	
 	public void initializeCompiler() {
-		//printInitialMessage();
+		printInitialMessage();
 		
-		// CHANGE TO DEFAULT
-		//String fileName = getFileNameFromUser();
-		//System.out.println();
-		String fileName = "test1.hposs";
+		/*Scanner scanner = new Scanner(System.in);
+		String input = scanner.nextLine();
+		input.trim();*/
 		
-		startCompilation(fileName);
+		//int option = Integer.parseInt(input);
+		int option = 3;
 		
+		System.out.print("Digite o nome do arquivo de entrada: ");
+		
+		//String fileName = scanner.nextLine().trim();
+		String fileName = "makeAutomata.txt";
+		
+		System.out.print("Ativar Trace (y/n): ");
+		
+		//input = scanner.next().trim();
+		String input = "y";
+		
+		boolean trace = false;
+		
+		switch(input) {
+		case "y":
+			trace = true;
+			break;
+		}
+		
+		System.out.println();
+		
+		//scanner.close();
+		
+		switch(option) {
+		case 1:
+			startCompilation(fileName, trace);
+			break;
+		case 2:
+			wirthAnalyzer(fileName, trace);
+		case 3:
+			makeAutomata(fileName, trace);
+
+		}
 		
 	}
 
-	private String getFileNameFromUser() {
-		Scanner scanner = new Scanner(System.in);
-		String fileName = scanner.nextLine();
-		
-		scanner.close();
-		
-		return fileName;
-	}
 
 	private void printInitialMessage() {
 		System.out.println("------------------------------------------------------------------------------------------------------------");
         System.out.println("Compilador - Escola Politecnica da USP");
         System.out.println("------------------------------------------------------------------------------------------------------------\n");
-        System.out.print("Arquivo fonte: ");
+        System.out.print("Options\n");
+        System.out.println("------------------------------------------------------------------------------------------------------------\n");
+        System.out.println("1: Arquivo de entrada - Linguagem HPOSS");
+        System.out.println("2: Analise de gramaticas em notacao de Wirth");
+        System.out.println("3: Construir automato a partir de Wirth");
+        System.out.println();
+        
+        System.out.print("Digite o numero da opcao: ");
 	}
 
-	private void startCompilation(String fileName) {
-		/*LexicalAnalyzer lexicalAnalyzer = null;
+	private void startCompilation(String fileName, boolean trace) {
+		LexicalAnalyzer lexicalAnalyzer = null;
 		
 		try {
 			lexicalAnalyzer = new LexicalAnalyzer(fileName);
@@ -54,46 +86,42 @@ public class Compiler {
 			return;
 		}
 		
-		lexicalAnalyzer.setTrackSwitch(true);
+		lexicalAnalyzer.setTrackSwitch(trace);
 		lexicalAnalyzer.readFile();
 		String fileString = lexicalAnalyzer.getNumberedLinesFile();
 		
 		System.out.println("\nArquivo lido:\n\n" + fileString);
 		
-		System.out.print("------------------------------------------------------------------------------------------------------------");
-		System.out.println("\nTokenizer");
-		System.out.println("------------------------------------------------------------------------------------------------------------\n");
+		if(trace) {
+			System.out.print("------------------------------------------------------------------------------------------------------------");
+			System.out.println("\nTokenizer");
+			System.out.println("------------------------------------------------------------------------------------------------------------\n");	
+		}
 		
 		boolean keepReading = true;
 		
 		while(keepReading) {
 			 TokenPair token = lexicalAnalyzer.getNextToken();
 			 
+			 
 			 if(token.getTokenType() == TokenType.INVALID ||
 					 token.getTokenType() == TokenType.EOF)
 				 keepReading = false;
 			 
-			 System.out.println("Token: " + token.toString());
+			 if(trace)
+				 System.out.println("Token: " + token.toString());
 		}
 		
-		##################
-		
-		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer);
+		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer, trace);
 		syntacticAnalyzer.recognize();
-		
-
-		###################*/
-		
-		
-		wirthAnalyzer();
 	
 	}
 
-	private void wirthAnalyzer() {
+	private void wirthAnalyzer(String fileName, boolean trace) {
 		LexicalAnalyzerWirth lexicalAnalyzerWirth;
 		
 		try {
-			lexicalAnalyzerWirth = new LexicalAnalyzerWirth("grammar.txt");
+			lexicalAnalyzerWirth = new LexicalAnalyzerWirth(fileName);
 		} catch (FileNotFoundException e) {
 			System.out.println("ERRO: Arquivo fonte nao encontrado.");
 			System.exit(0);
@@ -125,5 +153,46 @@ public class Compiler {
 		SyntaticalAnalyzerWirth syntacticAnalyzerWirth = new SyntaticalAnalyzerWirth(lexicalAnalyzerWirth);
 		syntacticAnalyzerWirth.recognize();
 
+	}
+	
+	private void makeAutomata(String fileName, boolean trace) {
+		LexicalAnalyzerWirth lexicalAnalyzerWirth;
+		
+		try {
+			lexicalAnalyzerWirth = new LexicalAnalyzerWirth(fileName);
+		} catch (FileNotFoundException e) {
+			System.out.println("ERRO: Arquivo fonte nao encontrado.");
+			System.exit(0);
+			return;
+		}
+		
+		
+		lexicalAnalyzerWirth.setTrackSwitch(false);
+		lexicalAnalyzerWirth.readFile();
+		String fileString = lexicalAnalyzerWirth.getNumberedLinesFile();
+		
+		System.out.println("\nArquivo lido:\n\n" + fileString);
+		
+		System.out.print("------------------------------------------------------------------------------------------------------------");
+		System.out.println("\nTokenizer");
+		System.out.println("------------------------------------------------------------------------------------------------------------\n");
+		
+		boolean keepReading = true;
+		
+		if(false) {
+			while(keepReading) {
+				 TokenPair token = lexicalAnalyzerWirth.getNextToken();
+				 
+				 if(token.getTokenType() == TokenType.INVALID ||
+						 token.getTokenType() == TokenType.EOF)
+					 keepReading = false;
+				 
+				 System.out.println("Token: " + token.toString());
+			}
+		}
+		
+		MakeAutomata automataMaker = new MakeAutomata(trace, lexicalAnalyzerWirth);
+		automataMaker.make();
+		
 	}
 }

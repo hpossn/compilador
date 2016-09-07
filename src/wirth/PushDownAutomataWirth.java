@@ -63,6 +63,13 @@ public class PushDownAutomataWirth {
 				return "NO_SUBMACHINE";
 		}
 		
+		if(subMachineName.equals("subGrammar") && isInFinalState()) {
+			if(!(t.getTokenType() == TokenType.TERMINAL) &&
+					!(t.getTokenType() == TokenType.NON_TERMINAL))
+				return "NO_SUBMACHINE";
+				
+		}
+		
 		
 		String token = t.getValue();
 		

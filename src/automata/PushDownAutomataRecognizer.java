@@ -9,9 +9,10 @@ public class PushDownAutomataRecognizer {
 	private List<PushDownAutomata> subMachines;
 	private LexicalAnalyzer lexicalAnalyzer;
 	
-	private boolean trace = true;
+	private boolean trace;
 
-	public PushDownAutomataRecognizer(List<PushDownAutomata> subMachines, LexicalAnalyzer lexicalAnalyzer) {
+	public PushDownAutomataRecognizer(List<PushDownAutomata> subMachines, LexicalAnalyzer lexicalAnalyzer, boolean trace) {
+		this.trace = trace;
 		this.subMachines = subMachines;
 		this.lexicalAnalyzer = lexicalAnalyzer;
 	}
