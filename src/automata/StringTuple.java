@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class StringTuple {
 	
-	private final String token;
-	private final int nextState;
+	protected final String token;
+	protected final int nextState;
 	
 	public StringTuple(String token, int nextState) {
 		this.token = token;
@@ -30,6 +30,13 @@ public class StringTuple {
 		return this.token.equals(tupla.token) && this.nextState == tupla.nextState;
 	}
 	
+	
+	
+	@Override
+	public String toString() {
+		return "[token=" + token + ", nextState=" + nextState + "]";
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(token, nextState);

@@ -14,6 +14,19 @@ public class PushDownAutomataWirth {
 	
 	private String subMachineName;
 	private Map<Integer, List<StringTuple>> transitions;
+	
+	public Map<Integer, List<StringTuple>> getStateTransitions() {
+		return transitions;
+	}
+
+	public Map<Integer, SubTuple> getSubMachineTransitions() {
+		return subMachineTransitions;
+	}
+
+	public void setSubMachineName(String subMachineName) {
+		this.subMachineName = subMachineName;
+	}
+
 	private Map<Integer, SubTuple> subMachineTransitions;
 	private List<String> finalStates;
 	

@@ -82,6 +82,7 @@ public class MakeAutomata {
 			boolean beginSB = false; // Square bracket
 			boolean beginCB = false; // Curly bracket
 			char mostRecent = '(';
+			boolean justEnded = false;
 
 			while (toDo) {
 				token = analyzer.getNextToken();
@@ -100,6 +101,7 @@ public class MakeAutomata {
 					pop();
 					transition = addTransition(previous, "BLANK", state);
 					if(trace) printStatus(token.getValue(), state, counter, transition);
+					justEnded = true;
 					break;
 				case "|":
 					state = getFirstFromStack();
@@ -121,6 +123,7 @@ public class MakeAutomata {
 					pop();
 					transition = addTransition(previous, "BLANK", state);
 					if(trace) printStatus(token.getValue(), state, counter, transition);
+					justEnded = true;
 					break;
 				case "{":
 					state = counter;
@@ -136,6 +139,7 @@ public class MakeAutomata {
 					pop();
 					transition = addTransition(previous, "BLANK", state);
 					if(trace) printStatus(token.getValue(), state, counter, transition);
+					justEnded = true;
 					break;
 				case ".":
 					state = getSecondFromStack();
@@ -145,6 +149,11 @@ public class MakeAutomata {
 				default:
 					counter++;
 					state++;
+					
+					if(justEnded) {
+						state = counter - 1;
+						justEnded = false;
+					}
 
 					if (stack.size() > 0)
 						offset = getSecondFromStack();
@@ -179,7 +188,7 @@ public class MakeAutomata {
 						if(!alphabet.contains(temp))
 							alphabet.add(temp);
 						
-						currentValue = token.getValue();
+						currentValue = temp;
 					} else {
 						currentValue = "sub" + token.getValue();
 					}

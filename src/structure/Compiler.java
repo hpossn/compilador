@@ -9,6 +9,7 @@ import automata.PushDownAutomata;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
+import maker.AutomataConverter;
 import maker.MakeAutomata;
 import syntaticalAnalyzer.SyntaticalAnalyzer;
 import wirth.LexicalAnalyzerWirth;
@@ -24,12 +25,13 @@ public class Compiler {
 		input.trim();*/
 		
 		//int option = Integer.parseInt(input);
-		int option = 3;
+		int option = 4;
 		
 		System.out.print("Digite o nome do arquivo de entrada: ");
 		
 		//String fileName = scanner.nextLine().trim();
-		String fileName = "makeAutomata.txt";
+		String fileName = "automaticallyGeneratedAutomata.txt";
+		//String fileName = "makeAutomata.txt";
 		
 		System.out.print("Ativar Trace (y/n): ");
 		
@@ -54,9 +56,13 @@ public class Compiler {
 			break;
 		case 2:
 			wirthAnalyzer(fileName, trace);
+			break;
 		case 3:
 			makeAutomata(fileName, trace);
-
+			break;
+		case 4:
+			eliminaVazio(fileName, trace);
+			break;
 		}
 		
 	}
@@ -71,6 +77,7 @@ public class Compiler {
         System.out.println("1: Arquivo de entrada - Linguagem HPOSS");
         System.out.println("2: Analise de gramaticas em notacao de Wirth");
         System.out.println("3: Construir automato a partir de Wirth");
+        System.out.println("4: Eliminar transicoes em vazio de automato");
         System.out.println();
         
         System.out.print("Digite o numero da opcao: ");
@@ -181,7 +188,7 @@ public class Compiler {
 		
 		boolean keepReading = true;
 		
-		if(false) {
+		if(trace) {
 			while(keepReading) {
 				 TokenPair token = lexicalAnalyzerWirth.getNextToken();
 				 
@@ -198,7 +205,11 @@ public class Compiler {
 		lexicalAnalyzerWirth.resetAnalyzer();
 		
 		MakeAutomata automataMaker = new MakeAutomata(trace, lexicalAnalyzerWirth);
-		automataMaker.make("automaticallyGenaratedAutomata.txt");
-		
+		automataMaker.make("automaticallyGeneratedAutomata.txt");
+	}
+	
+	private void eliminaVazio(String fileName, boolean trace) {
+		AutomataConverter converter = new AutomataConverter(fileName, trace);
+		converter.convert();
 	}
 }
