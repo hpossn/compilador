@@ -2,16 +2,16 @@ X = "a" "b" ( "c" "d" | "e" "f" ) | [ "g" | "h" { "i" "j" | "k" } ] { "m" } | { 
 
 
 Program = "PROGRAM" ID ";" { "VAR" Vardecl } { "FUNCTION" Funcdecl } "BEGIN" Composite . 
-Vardecl = id ":" Type ";" .
+Vardecl = ID ":" Type ";" .
 Type = "INT" | "STRING"| "BOOLEAN" | "VECTOR" Index. 
 Index = "[" Num ".." Num "]".
 Funcdecl = ID "(" Type ID { "," Type ID } ")" "->" FuncBlock  .
-FuncBlock = Command { Command } ["RETURN" Variable ";"] "ENDFUNC"
+FuncBlock = Command { Command } ["RETURN" Variable ";"] "ENDFUNC" .
 Composite = Command { Command } "END" .
-Command = (Assignment | "SUBCALL" Subcall | "GOTO" Goto | "BEGIN" Composite | "PRINT" IO | "READ" IO) ";" |
-			("VAR" Vardecl | "IF" Conditional | "WHILE" Loop)  .
-Assignment = Variable ":=" (Expression | "TRUE" | "FALSE" | "$" """ {letter} """).
-Variable = ID [ "[" Num "," Num "]" ].  
+Command = Assignment ";"| "SUBCALL" Subcall ";"| "GOTO" Goto ";"| "BEGIN" Composite ";"| "PRINT" IO ";"| "READ" IO ";"|
+			"VAR" Vardecl | "IF" Conditional | "WHILE" Loop  . 
+Assignment = Variable ":=" (Expression | "TRUE" | "FALSE" | "$" """ {Letter} """).
+Variable = ID [ "[" Eb "," Eb "]" ].  
 Goto = Num .
 IO = Variable {"," Variable} ";" .
 Conditional = Expression Relation Expression "THEN" { Command }  [ "ELSE"  { Command } ]  "ENDIF".
@@ -24,6 +24,5 @@ Num = Digit { Digit } .
 Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" .
 ID = Letter { Letter | Digit } .
 Letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" |
-              "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" .
+              "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" . 
 Comment = "#" {Letter | Digit} "#" . 
-

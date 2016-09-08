@@ -41,7 +41,7 @@ BEGIN
             
             #bla#
             
-            print value;
+            PRINT value;
 
-            print intVector;        
+            PRINT intVector;        
 END 

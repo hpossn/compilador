@@ -62,59 +62,64 @@ subMachine:subFuncdecl
 
 
 subMachine:subFuncBlock
-RETURN,END,ENDFUNC,;
+RETURN,ENDFUNC,;
 0
-15
+9
 6,subVariable,7
-9,subComposite,10
-10,sub=,11
 4,RETURN,6
 4,subCommand,4
 0,subCommand,4
-14,END,15
-14,subCommand,14
-11,subCommand,14
 4,ENDFUNC,9
 7,;,4
 
 
-subMachine:subCommand
-SUBCALL,GOTO,BEGIN,PRINT,READ,IF,WHILE,;,VAR
+subMachine:subComposite
+END
 0
-14
+5
+4,END,5
+4,subCommand,4
+0,subCommand,4
+
+
+subMachine:subCommand
+SUBCALL,GOTO,BEGIN,PRINT,READ,VAR,IF,WHILE,;
+0
+22
 0,SUBCALL,4
-0,GOTO,6
-0,BEGIN,8
-0,PRINT,10
-0,READ,12
-0,IF,18
-0,WHILE,20
-14,;,14
-12,subIO,14
-10,subIO,14
-8,subComposite,14
-6,subGoto,14
-20,subLoop,14
-4,subSubcall,14
-18,subConditional,14
-0,VAR,14
-0,subAssignment,14
-14,subVardecl,14
+0,GOTO,7
+0,BEGIN,10
+0,PRINT,13
+0,READ,15
+0,VAR,17
+0,IF,19
+0,WHILE,21
+0,subAssignment,2
+4,subSubcall,5
+21,subLoop,22
+7,subGoto,8
+10,subComposite,11
+19,subConditional,22
+17,subVardecl,22
+15,subIO,22
+13,subIO,22
+11,;,22
+8,;,22
+5,;,22
+2,;,22
 
 
 subMachine:subAssignment
-:=,$,",FALSE,TRUE
+:=,$,FALSE,TRUE
 0
-12
+9
 2,:=,3
 3,$,8
 0,subVariable,2
-11,",12
-11,subletter,11
-8,",11
-3,FALSE,12
-3,TRUE,12
-3,subExpression,12
+8,subID,9
+3,FALSE,9
+3,TRUE,9
+3,subExpression,9
 
 
 subMachine:subVariable
@@ -123,8 +128,8 @@ subMachine:subVariable
 8
 5,^,6
 7,],8
-4,subNum,5
-6,subNum,7
+4,subEb,5
+6,subEb,7
 8,[,4
 0,subID,8
 
