@@ -1,5 +1,6 @@
 package wirth;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import automata.StringTuple;
 import automata.SubTuple;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
+import maker.StringTupleComplete;
 
 public class PushDownAutomataWirth {
 	
@@ -61,6 +63,88 @@ public class PushDownAutomataWirth {
 	
 	public void resetState() {
 		currentState = initialState;
+	}
+	
+	public boolean modifyTransition(StringTupleComplete oldT, StringTupleComplete newT) {
+		if(oldT.getOrigin() == newT.getOrigin() &&
+				oldT.getToken().equals(newT.getToken())) {
+			//modifies Destination
+			List<StringTuple> temp = transitions.get(oldT.getOrigin());
+			
+			if(temp == null)
+				return false;
+			
+			for(StringTuple each : temp) {
+				if(each.getToken().equals(oldT.getToken())) {
+					temp.remove(each);
+					
+					temp.add(new StringTuple(newT.getToken(), newT.getNextState()));
+					
+					transitions.remove(newT.getOrigin());
+					transitions.put(newT.getOrigin(), temp);
+					return true;
+				}
+			}
+			
+			return false;
+			
+		} else if(oldT.getToken().equals(newT.getToken()) &&
+				oldT.getNextState() == newT.getNextState()) {
+			
+			//modifies origin
+			List<StringTuple> temp = transitions.get(oldT.getOrigin());
+			
+			if(temp == null)
+				return false;
+			
+			for(StringTuple each : temp) {
+				if(each.getToken().equals(oldT.getToken()) &&
+						each.getNextState() == oldT.getNextState()) {
+					temp.remove(each);
+					
+					transitions.remove(oldT.getOrigin());
+					transitions.put(oldT.getOrigin(), temp);
+					
+					List<StringTuple> temp2;
+					
+					if(transitions.containsKey(newT.getOrigin())) {
+						temp2 = transitions.get(newT.getOrigin());
+					} else {
+						temp2 = new ArrayList<>();
+					}
+					
+					temp2.add(new StringTuple(newT.getToken(), newT.getNextState()));
+					transitions.remove(newT.getOrigin());
+					transitions.put(newT.getOrigin(), temp2);
+					
+					return true;
+				}
+			}
+			
+			return false;
+			
+		}
+		
+		//modifies Token
+		List<StringTuple> temp = transitions.get(oldT.getOrigin());
+		
+		if(temp == null)
+			return false;
+		
+		for(StringTuple each : temp) {
+			if(each.getNextState() == newT.getNextState()) {
+				temp.remove(each);
+				
+				temp.add(new StringTuple(newT.getToken(), newT.getNextState()));
+				
+				transitions.remove(newT.getOrigin());
+				transitions.put(newT.getOrigin(), temp);
+				return true;
+			}
+		}
+		
+		return false;
+		
 	}
 	
 	public String findTransition(TokenPair t) {
@@ -154,6 +238,18 @@ public class PushDownAutomataWirth {
 		
 		return info.toString();
 		
+	}
+
+	public void changeState(int oldOne, int newOne) {
+		if(initialState == oldOne) initialState = newOne;
+		
+		if(finalStates.contains(oldOne + "")) {
+			int index = finalStates.indexOf(oldOne + "");
+			finalStates.set(index, newOne + "");
+		}
+		
+		if(currentState == oldOne) currentState = newOne;
+			
 	}
 
 

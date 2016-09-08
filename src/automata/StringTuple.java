@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class StringTuple {
 	
-	protected final String token;
-	protected final int nextState;
+	protected String token;
+	protected int nextState;
 	
 	public StringTuple(String token, int nextState) {
 		this.token = token;

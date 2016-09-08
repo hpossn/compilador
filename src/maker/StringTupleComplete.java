@@ -36,6 +36,10 @@ public class StringTupleComplete extends StringTuple {
 		return nextState;
 	}
 	
+	public void setNextState(int n) {
+		nextState = n;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if(this == o) return true;
@@ -47,7 +51,7 @@ public class StringTupleComplete extends StringTuple {
 	}
 	@Override
 	public String toString() {
-		return "[origin=" + origin +  ", token=" + token + ", nextState=" + nextState + "]";
+		return origin +  "," + token + "," + nextState;
 	}
 
 	@Override
