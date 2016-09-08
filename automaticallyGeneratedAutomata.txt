@@ -1,20 +1,15 @@
-subMachine:subProgram
-PROGRAM,;,VAR,FUNCTION,BEGIN
+subMachine:subVariable
+[,^,]
 0
 1
-0,PROGRAM,2
-2,subID,3
-3,;,4
-4,BLANK,5
-5,VAR,6
-6,subVardecl,7
-7,BLANK,5
-5,BLANK,8
-8,FUNCTION,9
-9,subFuncdecl,10
-10,BLANK,8
-8,BEGIN,11
-11,subComposite,12
-12,BLANK,1
+0,subID,2
+2,BLANK,3
+2,[,4
+4,subNum,5
+5,^,6
+6,subNum,7
+7,],8
+8,BLANK,3
+3,BLANK,1
 
 

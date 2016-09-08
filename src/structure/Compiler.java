@@ -1,11 +1,7 @@
 package structure;
 
 import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.Scanner;
-
-import automata.PushDownTransitions;
-import automata.PushDownAutomata;
 import lexicalAnalyzer.LexicalAnalyzer;
 import lexicalAnalyzer.TokenPair;
 import lexicalAnalyzer.TokenPair.TokenType;
@@ -17,27 +13,37 @@ import wirth.SyntaticalAnalyzerWirth;
 
 public class Compiler {
 	
+	private Scanner scanner = new Scanner(System.in);
+	
 	public void initializeCompiler() {
 		printInitialMessage();
 		
-		/*Scanner scanner = new Scanner(System.in);
 		String input = scanner.nextLine();
-		input.trim();*/
+		input.trim();
 		
-		//int option = Integer.parseInt(input);
-		int option = 4;
+		int option = 0;
+		
+		try {
+			option = Integer.parseInt(input);
+		} catch (Exception e) {
+			System.out.println("Valor incorreto");
+			System.exit(0);
+		}
+		
+		
+		//int option = 4;
 		
 		System.out.print("Digite o nome do arquivo de entrada: ");
 		
-		//String fileName = scanner.nextLine().trim();
-		String fileName = "automaticallyGeneratedAutomata.txt";
+		String fileName = scanner.nextLine().trim();
+		//String fileName = "automaticallyGeneratedAutomata.txt";
 		//String fileName = "makeAutomata.txt";
 		
 		System.out.print("Ativar Trace (y/n): ");
 		
-		//input = scanner.next().trim();
-		String input = "y";
-		
+		input = scanner.nextLine().trim();
+		//String input = "y";
+		//boolean trace = true;
 		boolean trace = false;
 		
 		switch(input) {
@@ -46,9 +52,7 @@ public class Compiler {
 			break;
 		}
 		
-		System.out.println();
-		
-		//scanner.close();
+		//System.out.println();
 		
 		switch(option) {
 		case 1:
@@ -86,6 +90,14 @@ public class Compiler {
 	private void startCompilation(String fileName, boolean trace) {
 		LexicalAnalyzer lexicalAnalyzer = null;
 		
+		System.out.print("Arquivo com transicoes (\"Enter\" para padrao): ");
+		
+		String ofile = scanner.nextLine().trim();
+		
+		if(ofile.equals(""))
+			ofile = "transitions.txt";
+		
+		
 		try {
 			lexicalAnalyzer = new LexicalAnalyzer(fileName);
 		} catch (FileNotFoundException e) {
@@ -119,7 +131,7 @@ public class Compiler {
 				 System.out.println("Token: " + token.toString());
 		}
 		
-		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer, trace);
+		SyntaticalAnalyzer syntacticAnalyzer = new SyntaticalAnalyzer(lexicalAnalyzer, trace, ofile);
 		syntacticAnalyzer.recognize();
 	
 	}
@@ -164,7 +176,11 @@ public class Compiler {
 
 	}
 	
-	private void makeAutomata(String fileName, boolean trace) {
+	private void makeAutomata(String fileName, boolean trace) {	
+		System.out.print("Arquivo de saida: ");
+		
+		String ofile = scanner.nextLine().trim();
+		
 		LexicalAnalyzerWirth lexicalAnalyzerWirth;
 		
 		try {
@@ -205,11 +221,16 @@ public class Compiler {
 		lexicalAnalyzerWirth.resetAnalyzer();
 		
 		MakeAutomata automataMaker = new MakeAutomata(trace, lexicalAnalyzerWirth);
-		automataMaker.make("automaticallyGeneratedAutomata.txt");
+		automataMaker.make(ofile);
 	}
 	
 	private void eliminaVazio(String fileName, boolean trace) {
-		AutomataConverter converter = new AutomataConverter(fileName, trace);
+		System.out.print("Arquivo de saida: ");
+		
+		String ofile = scanner.nextLine().trim();
+		//String ofile = "automatoProntoSemVazio.txt";
+		
+		AutomataConverter converter = new AutomataConverter(fileName, trace, ofile);
 		converter.convert();
 	}
 }

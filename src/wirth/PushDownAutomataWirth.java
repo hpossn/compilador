@@ -61,6 +61,22 @@ public class PushDownAutomataWirth {
 	}
 	
 	
+	public List<String> getFinalStates() {
+		return finalStates;
+	}
+
+	public void setFinalStates(List<String> finalStates) {
+		this.finalStates = finalStates;
+	}
+
+	public int getInitialState() {
+		return initialState;
+	}
+
+	public void setInitialState(int initialState) {
+		this.initialState = initialState;
+	}
+
 	public void resetState() {
 		currentState = initialState;
 	}

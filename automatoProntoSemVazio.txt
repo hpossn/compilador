@@ -1,0 +1,12 @@
+subMachine:subVariable
+^,],[
+0
+8
+5,^,6
+7,],8
+4,subNum,5
+6,subNum,7
+8,[,4
+0,subID,8
+
+

@@ -17,7 +17,7 @@ public class PushDownTransitions {
 	List<String> inputConfiguration;
 	private boolean trace;
 	
-	public PushDownTransitions(boolean trace){
+	public PushDownTransitions(boolean trace, String transistionsFile){
 		this.trace = trace;
 		subMachines = new ArrayList<>(); 
 		
@@ -26,7 +26,7 @@ public class PushDownTransitions {
 		BufferedReader bufferedReader;
 
 		try {
-			FileReader fileReader = new FileReader("transitions.txt");
+			FileReader fileReader = new FileReader(transistionsFile);
 			bufferedReader = new BufferedReader(fileReader);
 
 			String line = null;

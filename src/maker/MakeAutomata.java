@@ -23,7 +23,7 @@ public class MakeAutomata {
 	private List<Pair> stack;
 
 	public MakeAutomata(boolean trace, LexicalAnalyzerWirth lexicalAnalyzerWirth) {
-		this.trace = trace;
+		this.trace = true;
 		this.analyzer = lexicalAnalyzerWirth;
 		this.printStatusFlag = true;
 
@@ -219,6 +219,8 @@ public class MakeAutomata {
 		if(!alphabet.isEmpty()){
 			b.deleteCharAt(b.length() - 1);
 			subMachine.add(1, b.toString());
+		} else {
+			subMachine.add(1, "^");
 		}
 		
 		subMachine.add("\n");

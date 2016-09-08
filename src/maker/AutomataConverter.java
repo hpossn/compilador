@@ -1,7 +1,9 @@
 package maker;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,108 +12,38 @@ import automata.SubTuple;
 import wirth.PushDownAutomataWirth;
 
 public class AutomataConverter {
-
-	private String fileName;
-	private boolean trace;
+	private boolean trace = false;
 
 	private TransitionsMaker loadedAutomata;
 	private List<PushDownAutomataWirth> machines;
-	private Map<Integer, List<StringTuple>> transitions;
+	private List<String> cache;
+	private String outputFilename;
 
-	public AutomataConverter(String fileName, boolean trace) {
-		this.fileName = fileName;
+	public AutomataConverter(String fileName, boolean trace, String ofile) {
 		this.trace = trace;
+		this.outputFilename = ofile;
+		//outputFilename = "automatoProntoSemVazio.txt";
+		cache = new ArrayList<>();
 
 		loadedAutomata = new TransitionsMaker(fileName, false);
 		machines = loadedAutomata.getSubMachines();
 	}
 
-	public void convert() {
-		
-		
-		/*while (true) {
-		PushDownAutomataWirth currentMachine = machines.get(count);
-		currentMachineTrans = currentMachine.getStateTransitions();
-		currentMachineEmptyTrans = getCurrentMachineEmptyTransitions(currentMachineTrans);
-		
-		for(StringTupleComplete each : currentMachineEmptyTrans) {
-			int origin = each.getOrigin();
-			int destination = each.getNextState();
-			
-			System.out.println("------------------");
-			System.out.println("Estado " + origin);
-			
-			List<StringTupleComplete> leavingTrans = getLeavingTrans(origin, currentMachineTrans);
-			List<StringTupleComplete> arrivingTrans = getArrivingTrans(origin, currentMachineTrans);
-		
-			System.out.println("------------------");
-			
-		}
-
-		count++;
-
-		if (count > 0)
-			break;
-	}*/
-		
-		/*for(StringTupleComplete each : emptyTransitions) {
-		int origin = each.getOrigin();
-		int destination = each.getNextState();
-		
-		System.out.println("------------------");
-		System.out.println("Estado de destino " + destination + "\n");
-		
-		System.out.println("Inicialmente: ");
-		List<StringTupleComplete> leavingTransitions = getLeavingTrans(destination, currentMachineTrans);
-		List<StringTupleComplete> arrivingTransitions = getArrivingTrans(destination, currentMachineTrans);
-		
-		
-		//System.out.println("\n Aplica algoritmo:");
-		
-		for(StringTupleComplete eachLeaving : leavingTransitions) {
-			currentMachine.modifyTransition(eachLeaving, new StringTupleComplete(origin, eachLeaving.getToken(), eachLeaving.getNextState()));
-		}
-		
-		currentMachineTrans = currentMachine.getStateTransitions();
-		leavingTransitions = getLeavingTrans(destination, currentMachineTrans);
-		
-		//leavingTransitions.forEach(System.out::println);
-		
-		for(StringTupleComplete eachArriving : arrivingTransitions) {
-			currentMachine.modifyTransition(eachArriving, new StringTupleComplete(eachArriving.getOrigin(), eachArriving.getToken(), origin));
-		}
-		
-		currentMachineTrans = currentMachine.getStateTransitions();
-		arrivingTransitions = getArrivingTrans(destination, currentMachineTrans);
-		
-		//arrivingTransitions.forEach(System.out::println);
-		
-		currentMachine.changeState(destination, origin);
-		
-		if(currentMachineTrans.containsKey(destination)) {
-			System.out.println("FODEEEEUUUU");
-		}
-		
-		System.out.println("------------------");
-		
-		//emptyTransitions.remove(each);
-	}*/
-		
-		Map<Integer, List<StringTuple>> currentMachineTrans;
+	public void convert() {		
 		List<StringTupleComplete> emptyTransitions;
 		List<StringTupleComplete> allTransistions;
-
-		transitions = new HashMap<>();
 
 		int count = 0;
 		
 		while(true) {
 			
 			PushDownAutomataWirth currentMachine = machines.get(count);
-			currentMachineTrans = currentMachine.getStateTransitions();
 			
 			allTransistions = getAllTransitions(currentMachine);
 			emptyTransitions = getAllEmptyTransitions(allTransistions);
+			
+			int initialState = currentMachine.getInitialState();
+			List<String> finalStates = currentMachine.getFinalStates();
 			
 			//printAllTransitions(currentMachineTrans);
 			
@@ -134,12 +66,14 @@ public class AutomataConverter {
 							continue;
 					}
 					
-					System.out.println("------------------");
-					System.out.println("Estado de destino " + destination + "\n");
-					
-					System.out.println("Inicialmente: ");
+					if(trace) {
+						System.out.println("------------------");
+						System.out.println("Estado de destino " + destination + "\n");
+						
+						System.out.println("Inicialmente: ");
+					}
 					List<StringTupleComplete> leavingTransitions = getLeavingTrans(destination, allTransistions);
-					List<StringTupleComplete> arrivingTransitions = getArrivingTrans(destination, allTransistions);
+					List<StringTupleComplete> arrivingTransitions;
 					
 					
 					List<StringTupleComplete> temp = new ArrayList<>(leavingTransitions);
@@ -148,8 +82,15 @@ public class AutomataConverter {
 						eachLeaving.setOrigin(origin);
 						leavingTransitions.add(eachLeaving);
 					}					
-					System.out.println("Apos algoritmo:");
-					leavingTransitions.forEach(System.out::println);
+					
+					insertTransitions(allTransistions, leavingTransitions);
+					
+					if(trace) {
+						System.out.println("Apos algoritmo:");
+						leavingTransitions.forEach(System.out::println);
+					}
+					
+					arrivingTransitions = getArrivingTrans(destination, allTransistions);
 					
 					temp = new ArrayList<>(arrivingTransitions);
 					for(StringTupleComplete eachArriving : temp) {
@@ -158,14 +99,25 @@ public class AutomataConverter {
 						arrivingTransitions.add(eachArriving);
 					}		
 					
-					arrivingTransitions.forEach(System.out::println);
+					if(trace) {
+						arrivingTransitions.forEach(System.out::println);
+					}
 		
 					allTransistions.remove(eachBlank);
 					
-					insertTransitions(allTransistions, leavingTransitions);
+					
 					insertTransitions(allTransistions, arrivingTransitions);
 					
-					removeAllDestination(destination, allTransistions);
+					removeAllWithState(destination, allTransistions);
+					
+					if(destination == initialState)
+						initialState = origin;
+					
+					if(finalStates.contains(destination + "")) {
+						int index = finalStates.indexOf(destination + "");
+						finalStates.set(index, origin + "");
+					}
+						
 					
 					emptyTransitions = getAllEmptyTransitions(allTransistions);
 					
@@ -177,19 +129,82 @@ public class AutomataConverter {
 						break;
 				}
 				
-				System.out.println("\nTodas as transicoes");
+				System.out.println("\n\nSub-Maquina: " + currentMachine.getSubMachineName());
+				
+				System.out.println("Todas as transicoes");
 				allTransistions.forEach(System.out::println);
+				
+				System.out.println("\nEstado inicial: " + initialState);
+				System.out.println("Estados finais: " + finalStates.toString());
+				
+				cacheMachine(allTransistions, currentMachine, initialState, finalStates);
 			}
 			
 			count++;
 			
-			if(count > 0)
+			if(count >= machines.size()) {
 				break;
+			}
 		}
+		
+		writeToFile();
 
 	}
 	
-	private void removeAllDestination(int state, List<StringTupleComplete> allTransistions) {
+	private void writeToFile() {
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(outputFilename, "UTF-8");
+			cache.forEach(each -> writer.write(each + "\n"));
+			writer.close();
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			System.out.println("Problema na escrita do arquivo");
+			System.exit(0);
+		}
+		
+	}
+
+	private void cacheMachine(List<StringTupleComplete> allTransistions, PushDownAutomataWirth currentMachine, int initialState, List<String> finalStates) {
+		cache.add("subMachine:" + currentMachine.getSubMachineName());
+		
+		StringBuilder sb = new StringBuilder();
+		
+		List<String> temp = new ArrayList<>();
+		
+		for(StringTupleComplete each : allTransistions) {
+			if(!each.getToken().startsWith("sub")) {
+				if(!temp.contains(each.getToken())) {
+					temp.add(each.getToken());
+					sb.append(each.getToken().replace(',', '^') + ",");
+				}
+			}
+		}
+		
+		if(sb.length() > 0) {
+			cache.add(sb.substring(0, sb.length() - 1));
+		} else {
+			cache.add("^");
+		}
+		
+		cache.add(initialState + "");
+		
+		
+		sb = new StringBuilder();
+		for(String each : finalStates) {
+			sb.append(each + ",");
+		}
+		
+		if(sb.length() > 0)
+			cache.add(sb.substring(0, sb.length() - 1));
+		
+		for(StringTupleComplete each : allTransistions) {
+			cache.add(each.getOrigin() + "," + each.getToken().replace(',', '^') + "," + each.getNextState());
+		}
+		
+		cache.add("\n");
+	}
+
+	private void removeAllWithState(int state, List<StringTupleComplete> allTransistions) {
 		List<StringTupleComplete> temp;
 		
 		temp = new ArrayList<>(allTransistions);
@@ -232,7 +247,7 @@ public class AutomataConverter {
 		
 		
 		if(trace) {
-			System.out.println("Todas as transicoes: ");
+			System.out.println("\nTodas as transicoes: ");
 			transitions.forEach(System.out::println);
 			System.out.println();
 		}
@@ -240,49 +255,8 @@ public class AutomataConverter {
 		return transitions;
 		
 	}
-	
-	private void printAllTransitions(Map<Integer, List<StringTuple>> currentMachineTrans) {
-		for(int entry : currentMachineTrans.keySet()) {
-			List<StringTuple> temp = currentMachineTrans.get(entry);
-			for(StringTuple each : temp) {
-				System.out.println(String.format("Transicao: %d,%s,%d", entry, each.getToken(), each.getNextState()));
-			}
-		}
-		
-		System.out.println();
-	}
 
-
-	private List<StringTupleComplete> getAllEmptyTransitions(List<StringTupleComplete> allTransitions) {	
-		/*List<StringTupleComplete> list = new ArrayList<>();
-
-		for (int entry : currentMachineTrans.keySet()) {
-			List<StringTuple> tempList = currentMachineTrans.get(entry);
-
-			if (tempList == null) continue;
-
-			for (StringTuple each : tempList) {
-				if (each.getToken().equals("BLANK")) {
-					if(trace)
-						System.out.println("Transicao em vazio no estado " + entry  + ": " + each);
-					boolean clean = true;
-					for(StringTupleComplete listEntry : list) {
-						if(listEntry.getNextState() == each.getNextState())
-							clean = false;
-					}
-					if(clean)
-						list.add(new StringTupleComplete(entry, each));
-				}
-			}
-		}
-
-		System.out.println();
-		
-		if (trace)		
-			System.out.println();
-
-		return list;*/
-		
+	private List<StringTupleComplete> getAllEmptyTransitions(List<StringTupleComplete> allTransitions) {			
 		List<StringTupleComplete> emptyTransitions = new ArrayList<>();
 		
 		for (StringTupleComplete each : allTransitions) {

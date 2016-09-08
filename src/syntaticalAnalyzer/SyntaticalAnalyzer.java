@@ -12,11 +12,9 @@ public class SyntaticalAnalyzer {
 	private PushDownTransitions transitions;
 	private List<PushDownAutomata> machines;
 	private PushDownAutomataRecognizer recognizer;
-	private boolean trace;
 	
-	public SyntaticalAnalyzer(LexicalAnalyzer lexicalAnalyzer, boolean trace) {
-		this.trace = trace;
-		transitions = new PushDownTransitions(trace);
+	public SyntaticalAnalyzer(LexicalAnalyzer lexicalAnalyzer, boolean trace, String transitionsFile) {
+		transitions = new PushDownTransitions(trace, transitionsFile);
 		machines = transitions.getSubMachines();
 		
 		lexicalAnalyzer.resetAnalyzer();
