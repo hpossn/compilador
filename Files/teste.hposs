@@ -1,0 +1,37 @@
+PROGRAM prog1;
+
+VAR height, weight : int;
+VAR isEmpty : boolean;
+VAR name : string;
+VAR intVector : ARRAY[0..10] OF int;
+
+FUNCTION multiplyArray(ARRAY[0..10] OF int multiArray, int multiplier) : RETURN ARRAY[0..10] OF int ->
+
+            VAR count : int;
+            count := 0;
+
+            WHILE count < 11 DO:
+                multiArray[count] := multiArray[count] * multiplier;
+            END WHILE
+        
+            RETURN multiArray;        
+
+END FUNC
+
+BEGIN:
+            intVector[0] := 0; 
+            intVector[1] := 1; 
+            intVector[2] := 2; 
+            intVector[3] := 3; 
+            intVector[4] := 4; 
+            intVector[5] := 5; 
+            intVector[6] := 6; 
+            intVector[7] := 7; 
+            intVector[8] := 8; 
+            intVector[9] := 9; 
+            intVector[10] := 10; 
+
+            intVector := multiplyArray(intVector, 3);
+
+            print("Calculado");
+END

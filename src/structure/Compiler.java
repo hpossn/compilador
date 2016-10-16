@@ -18,33 +18,35 @@ public class Compiler {
 	public void initializeCompiler() {
 		printInitialMessage();
 		
-		String input = scanner.nextLine();
-		input.trim();
+		String input;
+		//String input = scanner.nextLine();
+		//input.trim();
 		
-		int option = 0;
+		int option = 1;
 		
-		try {
-			option = Integer.parseInt(input);
-		} catch (Exception e) {
-			System.out.println("Valor incorreto");
-			System.exit(0);
-		}
+//		try {
+//			option = Integer.parseInt(input);
+//		} catch (Exception e) {
+//			System.out.println("Valor incorreto");
+//			System.exit(0);
+//		}
 		
 		
 		//int option = 4;
 		
 		System.out.print("Digite o nome do arquivo de entrada: ");
 		
-		String fileName = scanner.nextLine().trim();
-		//String fileName = "automaticallyGeneratedAutomata.txt";
-		//String fileName = "makeAutomata.txt";
-		
+		//String fileName = scanner.nextLine().trim();
+		String fileName = "program.hposs";
+
 		System.out.print("Ativar Trace (y/n): ");
 		
-		input = scanner.nextLine().trim();
+		//input = scanner.nextLine().trim();
 		//String input = "y";
-		//boolean trace = true;
-		boolean trace = false;
+		boolean trace = true;
+		//boolean trace = false;
+		
+		input = "y";
 		
 		switch(input) {
 		case "y":
@@ -89,13 +91,15 @@ public class Compiler {
 
 	private void startCompilation(String fileName, boolean trace) {
 		LexicalAnalyzer lexicalAnalyzer = null;
+		trace = false;
+//		System.out.print("Arquivo com transicoes (\"Enter\" para padrao): ");
+//		
+//		String ofile = scanner.nextLine().trim();
+//		
+//		if(ofile.equals(""))
+//			ofile = "automata";
 		
-		System.out.print("Arquivo com transicoes (\"Enter\" para padrao): ");
-		
-		String ofile = scanner.nextLine().trim();
-		
-		if(ofile.equals(""))
-			ofile = "transitions.txt";
+		String ofile = "automata";
 		
 		
 		try {

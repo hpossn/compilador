@@ -3,11 +3,14 @@ package automata;
 import java.util.List;
 
 import lexicalAnalyzer.LexicalAnalyzer;
+import semantics.SemanticsAnalyzer;
+import semantics.TransitionInfo;
 
 public class PushDownAutomataRecognizer {
 
 	private List<PushDownAutomata> subMachines;
 	private LexicalAnalyzer lexicalAnalyzer;
+	private SemanticsAnalyzer semantics = new SemanticsAnalyzer();
 	
 	private boolean trace;
 
@@ -50,6 +53,14 @@ public class PushDownAutomataRecognizer {
 					acceptable = false;
 					keepGoing = false;
 				} else {
+					
+					String semanticOperation = currentMachine.getSubMachineName();
+					
+					TransitionInfo info = new TransitionInfo(currentMachine.getSubMachineName(),
+							"",
+							currentMachine.getCurrentState() + "",
+							"");
+					
 
 					String returnSubMachine = stack.top().split(":")[0];
 					String returnState = stack.top().split(":")[1];
@@ -67,6 +78,11 @@ public class PushDownAutomataRecognizer {
 
 					if (trace)
 						System.out.println("SubMachine return " + returnSubMachine + " state " + returnState);
+					
+					info.setGoingToMachine(returnSubMachine);
+					info.setGoingToState(returnState);
+					
+					semantics.performOperation(info);
 				}
 			} else if (transition.equals("ERROR")) {
 				acceptable = false;
@@ -80,6 +96,12 @@ public class PushDownAutomataRecognizer {
 					currentMachine.setCurrentState(Integer.parseInt(transition));
 					token = getNextToken();
 					
+					semantics.performOperation(new TransitionInfo(
+							currentMachine.getSubMachineName(),
+							currentMachine.getSubMachineName(),
+							transition,
+							transition));
+					
 				} else {
 					String[] subCallArray = transition.split(":");
 					
@@ -88,6 +110,12 @@ public class PushDownAutomataRecognizer {
 					if (trace)
 						System.out.println("Sub-machine call: " + currentMachine.getSubMachineName() + " -> " + nextMachine
 								+ ". Return state: " + subCallArray[1]);
+					
+					semantics.performOperation(new TransitionInfo(
+							currentMachine.getSubMachineName(),
+							nextMachine,
+							currentMachine.getCurrentState() + "",
+							"0"));
 
 					PushDownAutomata nextAut = null;
 					
@@ -125,6 +153,8 @@ public class PushDownAutomataRecognizer {
 			System.out.println("\n\nAccepted");
 		else
 			System.out.println("\n\nNot Accepted");
+		
+		System.out.println("\n\n" + semantics.getGenCode());
 
 	}
 
@@ -140,6 +170,8 @@ public class PushDownAutomataRecognizer {
 		
 		while(token.contains("#"))
 			token = lexicalAnalyzer.getNextToken().getValue();
+		
+		semantics.push(token);
 		
 		return token;
 	}

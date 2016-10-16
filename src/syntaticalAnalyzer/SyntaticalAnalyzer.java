@@ -6,6 +6,8 @@ import automata.PushDownAutomata;
 import automata.PushDownAutomataRecognizer;
 import automata.PushDownTransitions;
 import lexicalAnalyzer.LexicalAnalyzer;
+import semantics.SemanticsAnalyzer;
+import semantics.SymbolTable;
 
 public class SyntaticalAnalyzer {
 
@@ -24,6 +26,9 @@ public class SyntaticalAnalyzer {
 	
 	public void recognize() {
 		recognizer.transitions();
+		
+		//SemanticsAnalyzer semantics = new SemanticsAnalyzer();
+		//semantics.run();
 	}
 	
 	

@@ -1,0 +1,10 @@
+PROGRAM prog1;
+
+VAR height : INT;
+VAR width : INT;
+VAR idades : VECTOR[2..0];
+
+BEGIN
+            intVector := 1;
+                  
+END 

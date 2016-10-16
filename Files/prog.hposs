@@ -1,0 +1,47 @@
+PROGRAM prog1;
+
+VAR height : INT;
+VAR weight : INT;
+VAR isEmpty : BOOLEAN;
+VAR name : STRING;
+VAR intVector : VECTOR[10..0];
+
+#Function declaration#
+
+
+FUNCTION multiplyArray(VECTOR[10..0] multiArray, INT multiplier) ->
+            VAR count : INT;
+            count := 0;
+
+            WHILE _count < 11 DO
+                multiArray[_count, 0] := _multiArray[_count, 0] * _multiplier;
+            ENDWHILE
+        
+            RETURN multiArray;        
+
+ENDFUNC
+
+BEGIN
+            intVector[0, 0] := 0; 
+            intVector[1, 0] := 1; 
+            intVector[2, 0] := 2; 
+            intVector[3, 0] := 3; 
+            intVector[4, 0] := 4; 
+            intVector[5, 0] := 5; 
+            intVector[6, 0] := 6; 
+            intVector[7, 0] := 7; 
+            intVector[8, 0] := 8; 
+            intVector[9, 0] := 9; 
+            intVector[10, 0] := 10; 
+
+            intVector := _multiplyArray[_intVector, 3];
+            
+            VAR value : STRING;
+            value := $"value ";
+            
+            #bla#
+            
+            PRINT value;
+
+            PRINT intVector;        
+END 
