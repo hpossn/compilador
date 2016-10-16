@@ -2,10 +2,9 @@ package wirth;
 
 import java.util.List;
 
-import automata.PushDownAutomata;
 import automata.PushDownStack;
 import lexicalAnalyzer.TokenPair;
-import lexicalAnalyzer.TokenPair.TokenType;
+
 
 public class PushDownAutomataRecognizerWirth {
 
