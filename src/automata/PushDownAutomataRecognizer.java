@@ -154,7 +154,8 @@ public class PushDownAutomataRecognizer {
 		else
 			System.out.println("\n\nNot Accepted");
 		
-		System.out.println("\n\n" + semantics.getGenCode());
+		//System.out.println("\n\n" + semantics.getGenCode());
+		semantics.printCode();
 
 	}
 

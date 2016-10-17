@@ -5,6 +5,8 @@ import java.util.List;
 
 public class TokenStack {
 	
+	private int index = 0;
+	
 	private List<String> tokenStack = new ArrayList<>();
 	
 	public void push(String token) {
@@ -31,6 +33,16 @@ public class TokenStack {
 		for(String each : tokenStack) {
 			System.out.println(each);
 		}
+	}
+	
+	public void backToBottom() {
+		index = 0;
+	}
+	
+	public String next() {
+		if(index < tokenStack.size()) return tokenStack.get(index++);
+		
+		return null;
 	}
 
 }

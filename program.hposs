@@ -4,7 +4,12 @@ VAR height : INT;
 VAR width : INT;
 VAR idades : VECTOR[2..0];
 
+FUNCTION multArray(VECTOR[1..0] multiArray, INT multiplier) ->
+  	width := 2;  
+
+ENDFUNC
+
 BEGIN
-            intVector := 1;
+            height := 1;
                   
 END 
