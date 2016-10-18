@@ -10,9 +10,12 @@ public class SemanticsAnalyzer {
 	private StringBuilder funcParamBuilder = new StringBuilder();
 	private StringBuilder variablesBuilder = new StringBuilder();
 	private TokenStack tokenStack = new TokenStack();
+	private TokenStack tempTokenStack = new TokenStack();
 	private List<Variable> variableList = new ArrayList<>();
 	private String currentContext = "gbl";
 	private int counter = 0;
+	
+	private int expressionCounter = 0;
 
 	public void performOperation(TransitionInfo info) {
 		// if (semanticOperation.equals("subVardecl")) {
@@ -44,10 +47,58 @@ public class SemanticsAnalyzer {
 				&& info.comingFromMachine.equals("subFuncdecl")) {
 
 			createFuncDecl();
-
+		/*} else if(info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("12") &&
+				!info.goingToMachine.equals("subExpression")) {
+			solveExpression();*/
+			
+		} else if(!info.comingFromMachine.equals("subExpression") && info.goingToState.equals("4") &&
+				info.goingToMachine.equals("subExpression")) {
+			treatExpressionStart();
+			
+		} else if(info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("12") &&
+				!info.goingToMachine.equals("subExpression")) {
+			treatExpressionFinal();
+			
+			
+		} else if(info.comingFromMachine.equals("subCommand") && info.comingFromState.equals("2")) {
+			//assignmentFunction();
+			
 		}
+		
+		//System.out.println(info.toString());
 
 	}
+
+
+	private void treatExpressionFinal() {
+		if(--expressionCounter == 0) {
+			tokenStack.pop();
+			System.out.println("\n\n");
+			tokenStack.printStack();
+			tokenStack = tempTokenStack;
+			tempTokenStack = new TokenStack();
+		}
+		
+	}
+
+
+	private void treatExpressionStart() {
+		if(expressionCounter == 0) {
+			tempTokenStack.addStack(tokenStack);
+			tokenStack = new TokenStack();
+			
+			tokenStack.push(tempTokenStack.getHead());
+			
+			tempTokenStack.pop();
+		}
+		
+		expressionCounter++;
+		
+		/*System.out.println("\n\n");
+		tempTokenStack.printStack();
+		System.out.println("\n\n");*/
+	}
+
 
 	private void writeCode() {
 		//System.out.println(funcParamBuilder.toString());
@@ -259,6 +310,20 @@ public class SemanticsAnalyzer {
 		System.out.println(funcParamBuilder.toString());
 		System.out.println(";;;;;;;;;;;;;;Declaracoes;;;;;;;;;;;;;;\n");
 		System.out.println(genCode.toString());
+		
+	}
+	
+	private void solveExpression() {
+		System.out.println("\n\nEXPRESSION!!!");
+		tokenStack.printStack();
+		tokenStack.clear();
+		
+	}
+	
+	private void assignmentFunction() {
+		System.out.println("\n\nAssignment!!!");
+		tokenStack.printStack();
+		tokenStack.clear();
 		
 	}
 

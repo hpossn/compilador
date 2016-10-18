@@ -15,7 +15,8 @@ public class PushDownAutomataRecognizer {
 	private boolean trace;
 
 	public PushDownAutomataRecognizer(List<PushDownAutomata> subMachines, LexicalAnalyzer lexicalAnalyzer, boolean trace) {
-		this.trace = trace;
+		//this.trace = trace;
+		this.trace = false;
 		this.subMachines = subMachines;
 		this.lexicalAnalyzer = lexicalAnalyzer;
 	}
@@ -93,13 +94,15 @@ public class PushDownAutomataRecognizer {
 						System.out.println("Transition: " + currentMachine.getCurrentState() + ", " + token
 								+ " -> " + transition);
 					
+					String temp1 = currentMachine.getCurrentState() + "";
+					
 					currentMachine.setCurrentState(Integer.parseInt(transition));
 					token = getNextToken();
 					
 					semantics.performOperation(new TransitionInfo(
 							currentMachine.getSubMachineName(),
 							currentMachine.getSubMachineName(),
-							transition,
+							temp1,
 							transition));
 					
 				} else {
@@ -111,11 +114,8 @@ public class PushDownAutomataRecognizer {
 						System.out.println("Sub-machine call: " + currentMachine.getSubMachineName() + " -> " + nextMachine
 								+ ". Return state: " + subCallArray[1]);
 					
-					semantics.performOperation(new TransitionInfo(
-							currentMachine.getSubMachineName(),
-							nextMachine,
-							currentMachine.getCurrentState() + "",
-							"0"));
+					String tempNameCurrent = currentMachine.getSubMachineName();
+					String tempComingFromState = currentMachine.getCurrentState() + "";
 
 					PushDownAutomata nextAut = null;
 					
@@ -125,6 +125,12 @@ public class PushDownAutomataRecognizer {
 					stack.push(currentMachine.getSubMachineName() + ":" + subCallArray[1]);
 					currentMachine = subMachines.get(machineIndex);
 					currentMachine.resetState();
+					
+					semantics.performOperation(new TransitionInfo(
+							tempNameCurrent,
+							nextMachine,
+							tempComingFromState,
+							currentMachine.getCurrentState() + ""));
 
 				}
 			}

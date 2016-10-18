@@ -44,5 +44,13 @@ public class TokenStack {
 		
 		return null;
 	}
+	
+	public void addStack(TokenStack ts) {
+		tokenStack.addAll(ts.tokenStack);
+	}
+	
+	public boolean isEmpty() {
+		return tokenStack.isEmpty();
+	}
 
 }

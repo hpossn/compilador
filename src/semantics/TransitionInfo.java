@@ -1,10 +1,10 @@
 package semantics;
 
 public class TransitionInfo {
-	String comingFromMachine;
-	String goingToMachine;
-	String comingFromState;
-	String goingToState;
+	public String comingFromMachine;
+	public String goingToMachine;
+	public String comingFromState;
+	public String goingToState;
 	
 	public TransitionInfo(String comingFromMachine, String goingToMachine, String comingFromState,
 			String goingToState) {
@@ -39,5 +39,13 @@ public class TransitionInfo {
 	public void setGoingToState(String goingToState) {
 		this.goingToState = goingToState;
 	}
+
+	@Override
+	public String toString() {
+		return "TransitionInfo [comingFromMachine=" + comingFromMachine + ", goingToMachine=" + goingToMachine
+				+ ", comingFromState=" + comingFromState + ", goingToState=" + goingToState + "]";
+	}
+	
+	
 	
 }
