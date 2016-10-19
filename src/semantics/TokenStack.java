@@ -53,4 +53,7 @@ public class TokenStack {
 		return tokenStack.isEmpty();
 	}
 
+	public List<String> getFullStack() {
+		return new ArrayList<String>(tokenStack);
+	}
 }

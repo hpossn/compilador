@@ -4,7 +4,6 @@ VAR height : INT;
 
 
 BEGIN
-            height := (((1+2)/(3*5) + _barc * SUBCALL multiplyArray(0)) + 5 * ((3+1)/2));
- 	    height := (4+6)/3;
+ 	    height := ((((5+4)*3)+2*5))+(1*(5+3*8));
                   
 END 

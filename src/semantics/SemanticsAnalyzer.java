@@ -73,10 +73,13 @@ public class SemanticsAnalyzer {
 	private void treatExpressionFinal() {
 		if(--expressionCounter == 0) {
 			tokenStack.pop();
-			System.out.println("\n\n");
+			
+			System.out.println("\nNotacao infix");
 			tokenStack.printStack();
+			treatExpression(tokenStack.getFullStack());
 			tokenStack = tempTokenStack;
 			tempTokenStack = new TokenStack();
+			
 		}
 		
 	}
@@ -98,6 +101,18 @@ public class SemanticsAnalyzer {
 		tempTokenStack.printStack();
 		System.out.println("\n\n");*/
 	}
+	
+	private void treatExpression(List<String> fullStack) {
+		System.out.println("\n\nNotacao RPN");
+		RPNConverter rpnConverter = new RPNConverter();
+		List<String> rpnList = rpnConverter.convert(fullStack);
+		
+		for(String each : rpnList) {
+			System.out.println(each);
+		}
+		
+	}
+
 
 
 	private void writeCode() {
