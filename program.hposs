@@ -4,6 +4,9 @@ VAR height : INT;
 
 
 BEGIN
- 	    height := ((((5+4)*3)+2*5))+(1*(5+3*8));
+ 	    height := (5+2) * 3 + _height + 2;
+
+	    VAR width : INT;
+  	    width := 5 + 18 * (3 + _height);
                   
 END 

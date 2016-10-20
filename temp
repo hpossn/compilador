@@ -1,0 +1,2 @@
+height := (((1+2)/(3*5) + _barc * SUBCALL multiplyArray(0)) + 5 * ((3+1)/2));
+height := (((1+2)/(3*5) + _barc * SUBCALL multiplyArray(0, (5+3))) + 5 * ((3+1)/2));
