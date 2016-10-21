@@ -102,6 +102,11 @@ public class RPNConverter {
 			if(token.equals("_")) {
 				String temp = "_" + initialList.get(++i);
 				
+				if(initialList.size() == i + 1) {
+					finalList.add(temp);
+					break;
+				}
+				
 				if(initialList.get(i + 1).equals("[")) {
 					i++;
 					temp = temp + "[";

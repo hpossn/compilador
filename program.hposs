@@ -4,9 +4,11 @@ VAR height : INT;
 
 
 BEGIN
- 	    height := (5+2) * 3 + _height + 2;
 
-	    VAR width : INT;
-  	    width := 5 + 18 * (3 + _height);
+	IF 1 >= 2 THEN
+		height := 18;
+	ELSE
+		height := 3;
+	ENDIF
                   
 END 
