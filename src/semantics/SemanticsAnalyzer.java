@@ -29,10 +29,13 @@ public class SemanticsAnalyzer {
 	private int counterOperators = 0;
 	private int paramCounter = 0;
 	private int expressionCounter = 0;
+	private int dummyCount = 0;
 
 	public SemanticsAnalyzer() {
 		constantList.add("const_0");
 		writeToConstFormatted("0");
+		constantList.add("const_8000");
+		writeToConstFormatted("8000");
 	}
 
 	public void performOperation(TransitionInfo info) {
@@ -522,6 +525,34 @@ public class SemanticsAnalyzer {
 				} else {
 					throw new AssertionError("Variavel nao existe");
 				}
+			} else if(isVector(token)) {
+				String fullName = existsInVariable(token);
+				int num1 = getNumVector(token, 1);
+				int num2 = getNumVector(token, 2);
+				if (fullName != null) {
+					writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+					writeToGenFormatted("", "LV", "=" + num1, "Carrega valor da linha");
+					writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+					writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+					writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+					writeToGenFormatted("", "LV", "=" + num2, "Carrega a coluna");
+					writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+					writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+					writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+					writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+					writeToGenFormatted("", "+", "const_8000", "Soma codigo de load");
+					dummyCount++;
+					writeToGenFormatted("", "MM", "dummy_" + dummyCount, "Salva codigo de load");
+					writeToGenFormatted("dummy_" + dummyCount, "K", "=0000", "Executa o load");
+					writeToGenFormatted("", "SC", "PUSH", "Envia valor para pilha");
+				} else {
+					throw new AssertionError("Variavel nao existe");
+				}
 			}
 
 		}
@@ -531,8 +562,28 @@ public class SemanticsAnalyzer {
 
 	}
 
+	private int getNumVector(String token, int i) {
+		token = token.substring(token.indexOf('[') + 1, token.length() - 1);
+		String value = token.split(",")[i - 1];
+		
+		return Integer.parseInt(value);
+	}
+
+	private boolean isVector(String token) {
+		if (token.startsWith("_")) {
+			if(token.contains("[")) return true;
+		}
+		return false;
+	}
+
 	private String existsInVariable(String token) {
 		token = token.substring(1);
+		
+		if(token.contains("[")) {
+			int indexChar = token.indexOf('[');
+			token = token.substring(0, indexChar);
+			
+		}
 		
 		
 		for (Variable each : variableList) {
@@ -553,8 +604,10 @@ public class SemanticsAnalyzer {
 	}
 
 	private boolean isVariable(String token) {
-		if (token.startsWith("_"))
+		if (token.startsWith("_")) {
+			if(token.contains("[")) return false;
 			return true;
+		}
 		return false;
 	}
 
@@ -613,21 +666,19 @@ public class SemanticsAnalyzer {
 		tokenStack.clear();
 	}
 
-	public void variableDeclaration(List<Variable> variables) {
-		StringBuilder builder = new StringBuilder();
+	public void variableDeclaration(Variable variable, String maxNumSize) {
 
-		for (Variable each : variables) {
-			if (each.getType().equals("int")) {
+			if (variable.getType().equals("int")) {
 
-				String decString = "=" + each.getValue();
-				writeToVariableFormatted(each.getFullName(), decString, false);
-			} else if (each.getType().contains("vector")) {
-
-				int size = getVectorSize(each.getType());
-				writeToVariableFormatted(each.getFullName(), size + "", true);
+				String decString = "=" + variable.getValue();
+				writeToVariableFormatted(variable.getFullName(), decString, false);
+			} else if (variable.getType().contains("vector")) {
+				int size = getVectorSize(variable.getType());
+				writeToVariableFormatted(variable.getFullName(), size + "", true);
+				writeToVariableFormatted("max_" + variable.getFullName(), "=" + maxNumSize, false);
 			}
 
-		}
+		
 		// System.out.println(builder.toString());
 
 	}
@@ -640,7 +691,7 @@ public class SemanticsAnalyzer {
 		int int1 = Integer.parseInt(array[0]);
 		int int2 = Integer.parseInt(array[1]);
 
-		return (int1 + 1) * (int2 + 1);
+		return (int1) * (int2);
 	}
 
 	private void createVariable() {
@@ -650,7 +701,7 @@ public class SemanticsAnalyzer {
 		String varType;
 		String varName;
 		String num1;
-		String num2;
+		String num2 = "";
 
 		if (!t.equals(";"))
 			return;
@@ -683,7 +734,11 @@ public class SemanticsAnalyzer {
 			throw new AssertionError("Ja contem variavel" + v.getFullName());
 
 		variableList.add(v);
-		writeToVariableFormatted(v.getFullName(), "=0", false);
+		//writeToVariableFormatted(v.getFullName(), "=0", false);
+		
+
+		variableDeclaration(v, num2);
+
 
 		// tokenStack.push(stackTop);
 		tokenStack.clear();
