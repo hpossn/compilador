@@ -1,13 +1,13 @@
 Program = "PROGRAM" ID ";" { "VAR" Vardecl } { "FUNCTION" Funcdecl } "BEGIN" Composite . 
 Vardecl = ID ":" Type ";" .
-Type = "INT" | "STRING" | "BOOLEAN" | "VECTOR" Index. 
+Type = "INT" | "STRING" | "VECTOR" Index. 
 Index = "[" Num ".." Num "]".
 Funcdecl = ID "(" [Type ID { "," Type ID }] ")" "->" FuncBlock  .
 FuncBlock = Command { Command } ["RETURN" Variable ";"] "ENDFUNC" .
 Composite = Command { Command } "END" .
 Command = Assignment ";"| "SUBCALL" Subcall ";"| "BEGIN" Composite ";"| "PRINT" IO | "READ" IO |
 			"VAR" Vardecl | "IF" Conditional | "WHILE" Loop  . 
-Assignment = Variable ":=" (Expression | "TRUE" | "FALSE" | "$" ID ).
+Assignment = Variable ":=" (Expression  "_" ID ).
 Variable = ID [ "[" Eb "," Eb "]" ].  
 IO = Variable {"," Variable} ";" .
 Conditional = Expression Relation Expression "THEN" { Command }  [ "ELSE"  { Command } ]  "ENDIF".

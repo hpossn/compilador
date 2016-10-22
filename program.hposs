@@ -2,6 +2,13 @@ PROGRAM prog1;
 
 VAR height : INT;
 
+FUNCTION calcSoma(INT v1, INT v2) ->
+	VAR result : INT;
+	result := _v1 + _v2;
+        
+	RETURN result;        
+ENDFUNC
+
 BEGIN   
-	height := SUBCALL calcula(_height * 3, 3+ 2 * _height);
+	VAR vValues : VECTOR[10..1];
 END 

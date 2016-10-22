@@ -173,7 +173,7 @@ public class SemanticsAnalyzer {
 		tokenStack.clear();
 		tokenStack.push(stackTop);		
 		paramStackExp.add(0);
-		
+		paramCounter++;
 	}
 
 	private void colocaSubRotinaNoStack() {
@@ -188,8 +188,9 @@ public class SemanticsAnalyzer {
 		
 		tokenStack.clear();
 		tokenStack.push(stackTop);
-//		tokenStack.push("(");
-//		tokenStack.push(")");
+		
+		if(!stackTop.equals("("))
+			paramCounter++;
 		
 		paramStackExp.add(0);
 		
@@ -200,6 +201,18 @@ public class SemanticsAnalyzer {
 		tokenStack.printStack();
 		System.out.println("==================");
 		
+		if(paramCounter  > 1) {
+			writeToGenFormatted("", "", "", "");
+			for(int i = paramCounter; i > 0; i--) {
+				writeToGenFormatted("", "SC", "POP", "Retira da pilha original");
+				writeToGenFormatted("", "SC", "PARAM_PUSH", "Coloca na pilha de parametros");
+			}
+			
+			writeToGenFormatted("", "", "", "");
+			
+			paramCounter = 0;
+		}
+		
 		String funcName = subCallStack.remove(subCallStack.size() - 1);
 		writeToGenFormatted("", "SC", funcName, "Chama funcao " + funcName);
 		
@@ -207,7 +220,6 @@ public class SemanticsAnalyzer {
 		tokenStack.clear();
 		tokenStack.push(stackTop);
 		
-		paramCounter = 0;
 		paramStackExp.clear();
 		tempParamTokenStack.clear();
 		
@@ -737,7 +749,7 @@ public class SemanticsAnalyzer {
 
 			String initialName = tokenStack.next();
 			paramName = currentContext + "_" + initialName;
-			writeToGenFormatted("", "SC", "POP", "Retira parametro da pilha");
+			writeToGenFormatted("", "SC", "PARAM_POP", "Retira parametro da pilha");
 			writeToGenFormatted("", "MM", paramName, "Salva na variavel");
 
 			t = tokenStack.next();
