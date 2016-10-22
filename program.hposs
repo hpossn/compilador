@@ -2,13 +2,6 @@ PROGRAM prog1;
 
 VAR height : INT;
 
-
-BEGIN
-
-	IF 1 >= 2 THEN
-		height := 18;
-	ELSE
-		height := 3;
-	ENDIF
-                  
+BEGIN   
+	height := SUBCALL calcula(_height * 3, 3+ 2 * _height);
 END 

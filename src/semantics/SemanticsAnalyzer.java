@@ -17,17 +17,22 @@ public class SemanticsAnalyzer {
 	private List<String> contextStack = new ArrayList<>();
 	private List<String> functionNameStack = new ArrayList<>();
 	private List<String> flowStack = new ArrayList<>();
+	private List<String> subCallStack = new ArrayList<>();
+	private List<Integer> paramStackExp = new ArrayList<>();
+	private List<TokenStack> tempParamTokenStack = new ArrayList<>();
 
 	private AssignmentStack assignmentStack = new AssignmentStack();
 
+	private List<Integer> counterStack = new ArrayList<>();
+	
 	private int counter = 0;
 	private int counterOperators = 0;
-
+	private int paramCounter = 0;
 	private int expressionCounter = 0;
 
 	public SemanticsAnalyzer() {
 		constantList.add("const_0");
-		constantBuilder.append("const_0\tK\t=0\t; Adds constant 0\n");
+		writeToConstFormatted("0");
 	}
 
 	public void performOperation(TransitionInfo info) {
@@ -53,7 +58,7 @@ public class SemanticsAnalyzer {
 			// Inicio da rotina principal
 		} else if (info.goingToMachine.equals("subProgram") && info.goingToState.equals("11")) {
 			System.out.println("subProgram");
-			writeGlobalVariables();
+			//writeGlobalVariables();
 			// writeCode();
 
 			currentContext = "bgn";
@@ -81,8 +86,7 @@ public class SemanticsAnalyzer {
 			exitFunction();
 
 			// Expressao inicio
-		} else if (!info.comingFromMachine.equals("subExpression") && info.goingToState.equals("4")
-				&& info.goingToMachine.equals("subExpression")) {
+		} else if (info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("4")) {
 			System.out.println("subExp start");
 			treatExpressionStart();
 
@@ -101,37 +105,146 @@ public class SemanticsAnalyzer {
 			 * }
 			 */
 
-			// Inicio assignment
+		// Inicio assignment
 		} else if (info.comingFromMachine.equals("subAssignment") && info.goingToState.equals("3")) {
 			assignmentFunctionStart();
 			System.out.println("subAssignment Start");
 
-			// Fim assignment
+		// Fim assignment
 		} else if (info.comingFromMachine.equals("subAssignment") && info.comingFromState.equals("9")) {
 			assignmentFunctionEnd();
 			System.out.println("subAssignment End");
 
-			// Condicional THEN
+		// Condicional THEN
 		} else if (info.comingFromMachine.equals("subConditional") && info.comingFromState.equals("4")) {
 			startIF();
 
-			// Condicional ELSE
+		// Condicional ELSE
 		} else if (info.comingFromMachine.equals("subConditional") && info.comingFromState.equals("11")
 				&& info.goingToState.equals("11")) {
 			escreveElse();
 
-			// END IF
+		// END IF
 		} else if (info.comingFromMachine.equals("subConditional") && info.comingFromState.equals("12")) {
 			finalizaIF();
 			
-			// Operador de comparacao
+		// Operador de comparacao
 		} else if (info.comingFromMachine.equals("subRelation") && info.comingFromState.equals("7")) {
 			colocaOperador();
-
+			
+			//Inicio While
+		} else if(info.comingFromMachine.equals("subCommand") && info.comingFromState.equals("21")) {
+			startWhile();
+			
+			//Meio While
+		} else if(info.comingFromMachine.equals("subLoop") && info.comingFromState.equals("4")) {
+			meioWhile();
+			
+			//Finaliza While
+		} else if(info.comingFromMachine.equals("subLoop") && info.comingFromState.equals("8")) {
+			finalizaWhile();
+			
+			//Chamada de funcao inicio
+		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("2")) {
+			colocaSubRotinaNoStack();
+			
+			
+			//Chamada de funcao, multiplos parametros
+		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("7")) {
+			multiplosParametros();
+			
+			
+		//Chamada de funcao fim	
+		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("9")) {
+			chamaSubRotina();
 		}
 
-		// System.out.println(info.toString());
+		//System.out.println(info.toString());
 
+	}
+
+	private void multiplosParametros() {
+		System.out.println("\n\n====MULTIPLOS PARAMETROS");
+		tokenStack.printStack();
+		System.out.println("==================\n\n");
+		
+		String stackTop = tokenStack.pop();
+		tokenStack.pop();
+		tokenStack.clear();
+		tokenStack.push(stackTop);		
+		paramStackExp.add(0);
+		
+	}
+
+	private void colocaSubRotinaNoStack() {
+		System.out.println("=============Subrotina start");
+		tokenStack.printStack();
+		System.out.println("==================");
+		
+		String stackTop = tokenStack.pop();
+		
+		tokenStack.pop();
+		subCallStack.add("sub_" + tokenStack.pop());
+		
+		tokenStack.clear();
+		tokenStack.push(stackTop);
+//		tokenStack.push("(");
+//		tokenStack.push(")");
+		
+		paramStackExp.add(0);
+		
+	}
+
+	private void chamaSubRotina() {
+		System.out.println("=============Subrotina end");
+		tokenStack.printStack();
+		System.out.println("==================");
+		
+		String funcName = subCallStack.remove(subCallStack.size() - 1);
+		writeToGenFormatted("", "SC", funcName, "Chama funcao " + funcName);
+		
+		String stackTop = tokenStack.pop();
+		tokenStack.clear();
+		tokenStack.push(stackTop);
+		
+		paramCounter = 0;
+		paramStackExp.clear();
+		tempParamTokenStack.clear();
+		
+	}
+
+	private void startWhile() {
+		writeToGenFormatted("start_while" + ++counter, "+", "const_0", "Inicia While");
+		counterStack.add(counter);
+	}
+
+	private void finalizaWhile() {
+		System.out.println("Finaliza While");
+		int count = counterStack.remove(counterStack.size() - 1);
+		writeToGenFormatted("", "JP", "start_while" + count, "Volta para o loop");
+		writeToGenFormatted("end_while_" + count, "+", "const_0", "Termina While");
+		
+		String stackTop = tokenStack.pop();
+		tokenStack.clear();
+		tokenStack.push(stackTop);
+
+		
+	}
+
+	private void meioWhile() {
+		String stackTop = tokenStack.pop();
+		tokenStack.clear();
+		tokenStack.push(stackTop);
+		
+		String operator = flowStack.remove(flowStack.size() - 1);
+		escreveOperador(operator);
+		
+		int count = counterStack.get(counterStack.size() - 1);
+		
+		
+		writeToGenFormatted("", "SC", "POP", "Busca resultado da comparacao");
+		writeToGenFormatted("", "JZ", "end_while_" + count, "Vai para final do while");
+		
 	}
 
 	private void colocaOperador() {
@@ -148,14 +261,20 @@ public class SemanticsAnalyzer {
 	private void finalizaIF() {
 		System.out.println("Finaliza IF");
 		int index = flowStack.size() - 1;
+		
+		int count = counterStack.remove(counterStack.size() - 1);
 
 		if (index < 0) {
-			writeToGenFormatted("else_if_" + counter, "+", "const_0", "Vai para else se codicao falsa");
+			writeToGenFormatted("else_if_" + count, "+", "const_0", "Vai para else se codicao falsa");
 		} else {
 			flowStack.remove(index);
 		}
 		
-		writeToGenFormatted("end_if_" + counter, "+", "const_0", "Termina IF");
+		writeToGenFormatted("end_if_" + count, "+", "const_0", "Termina IF");
+		
+		String stackTop = tokenStack.pop();
+		tokenStack.clear();
+		tokenStack.push(stackTop);
 
 	}
 
@@ -165,7 +284,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
 			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
-			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2");
+			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2, verdadeiro");
 			writeToGenFormatted("", "LV", "=0000", "Carrega valor zero");
 			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
 			counterOperators -= 2;
@@ -177,8 +296,8 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
 			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
-			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2");
-			writeToGenFormatted("", "JZ", "value_" + counterOperators, "Se op1 = op2");
+			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2, falso");
+			writeToGenFormatted("", "JZ", "value_" + counterOperators, "Se op1 = op2, falso");
 			writeToGenFormatted("", "LV", "=0001", "Carrega valor um, op1 > op2");
 			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
 			counterOperators -= 2;
@@ -189,8 +308,8 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
 			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
-			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2");
-			writeToGenFormatted("", "LV", "=0001", "Carrega valor um, op1 > op2");
+			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2, falso");
+			writeToGenFormatted("", "LV", "=0001", "Carrega valor um, op1 >= op2, verdadeiro");
 			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0000", "Condicao Falsa");
@@ -200,12 +319,34 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
 			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
-			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2");
-			writeToGenFormatted("", "JZ", "value_" + counterOperators, "Se op1 < op2");
+			writeToGenFormatted("", "JN", "value_" + ++counterOperators, "Se op1 < op2, verdadeiro");
+			writeToGenFormatted("", "JZ", "value_" + counterOperators, "Se op1 == op2, verdadeiro");
 			writeToGenFormatted("", "LV", "=0000", "Carrega valor zero");
 			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0001", "Condicao verdadeira");
+			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+		} else if(operator.equals("==")) {
+			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
+			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
+			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "JZ", "value_" + ++counterOperators, "Se op1 == op2, verdadeiro");
+			writeToGenFormatted("", "LV", "=0000", "Carrega valor zero");
+			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
+			counterOperators -= 2;
+			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0001", "Condicao verdadeira");
+			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+		} else if(operator.equals("!=")) {
+			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
+			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
+			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "JZ", "value_" + ++counterOperators, "Se op1 == op2, false");
+			writeToGenFormatted("", "LV", "=0001", "Carrega valor zero");
+			writeToGenFormatted("", "JP", "value_" + ++counterOperators, "Pula para finalizar");
+			counterOperators -= 2;
+			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0000", "Condicao verdadeira");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
 		}
 		
@@ -213,8 +354,11 @@ public class SemanticsAnalyzer {
 
 	private void escreveElse() {
 		System.out.println("ELSE Starts here");
-		writeToGenFormatted("", "JP", "end_if_" + counter, "Vai para o final do IF");
-		writeToGenFormatted("else_if_" + counter, "+", "const_0", "Vai para else se codicao falsa");
+		
+		int count = counterStack.get(counterStack.size() - 1);
+		
+		writeToGenFormatted("", "JP", "end_if_" + count, "Vai para o final do IF");
+		writeToGenFormatted("else_if_" + count, "+", "const_0", "Vai para else se codicao falsa");
 		flowStack.add("else");
 
 	}
@@ -233,6 +377,8 @@ public class SemanticsAnalyzer {
 		
 		writeToGenFormatted("", "SC", "POP", "Busca resultado da comparacao");
 		writeToGenFormatted("", "JZ", "else_if_" + counter, "Vai para else se codicao falsa");
+		
+		counterStack.add(counter);
 
 	}
 
@@ -240,6 +386,7 @@ public class SemanticsAnalyzer {
 		String functionName = functionNameStack.remove(functionNameStack.size() - 1);
 
 		writeToGenFormatted("", "RS", functionName, "Retorno de sub Rotina");
+		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 	}
 
 	private void returnFunction() {
@@ -256,31 +403,67 @@ public class SemanticsAnalyzer {
 	private void assignmentFunctionEnd() {
 		String var = assignmentStack.pop();
 
+		writeToGenFormatted("", "SC", "POP", "Retira valor da pilha");
 		writeToGenFormatted("", "MM", var, "Salva atribuicao na variavel");
 	}
 
-	private void treatExpressionFinal() {		
-		if (--expressionCounter == 0) {
-			String topOfStack = tokenStack.pop();
-			treatExpression(tokenStack.getFullStack());
-			tokenStack = tempTokenStack;
-			tempTokenStack = new TokenStack();
-			tokenStack.push(topOfStack);
+	private void treatExpressionFinal() {
+		
+		if(paramStackExp.size() > 0) {
+			
+			int value = paramStackExp.remove(paramStackExp.size() - 1) - 1;
+			
+			if(value == 0) {
+				String topOfStack = tokenStack.pop();
+				treatExpression(tokenStack.getFullStack());
+				tokenStack = tempParamTokenStack.remove(tempParamTokenStack.size() - 1);
+				tokenStack.push(topOfStack);
+			} else  {
+				paramStackExp.add(value);
+			}
+			
+		} else {
+			if (--expressionCounter == 0) {
+				String topOfStack = tokenStack.pop();
+				treatExpression(tokenStack.getFullStack());
+				tokenStack = tempTokenStack;
+				tempTokenStack = new TokenStack();
+				tokenStack.push(topOfStack);
+			}
+			
 		}
 
 	}
 
 	private void treatExpressionStart() {
-		if (expressionCounter == 0) {
-			tempTokenStack.addStack(tokenStack);
-			tokenStack = new TokenStack();
+		
+		if(paramStackExp.size() != 0) {
+			int expCount = paramStackExp.remove(paramStackExp.size() - 1);
+			if (expCount == 0) {
+				TokenStack tTokenStack = new TokenStack();
+				tTokenStack.addStack(tokenStack);
+				tokenStack = new TokenStack();
 
-			tokenStack.push(tempTokenStack.getHead());
+				tokenStack.push(tTokenStack.getHead());
 
-			tempTokenStack.pop();
+				tTokenStack.pop();
+				tempParamTokenStack.add(tTokenStack);
+			}
+			
+			paramStackExp.add(++expCount);
+			
+		} else {
+			if (expressionCounter == 0) {
+				tempTokenStack.addStack(tokenStack);
+				tokenStack = new TokenStack();
+
+				tokenStack.push(tempTokenStack.getHead());
+
+				tempTokenStack.pop();
+			}
+
+			expressionCounter++;
 		}
-
-		expressionCounter++;
 
 	}
 
@@ -292,9 +475,15 @@ public class SemanticsAnalyzer {
 		// for(String each : rpnList) {
 		// System.out.println(each);
 		// }
+		
+		System.out.println("=============Treat expression");
+		tokenStack.printStack();
+		System.out.println("==================");
 
 		System.out.println();
 		writeExpressionASM(rpnList);
+		
+		
 
 	}
 
@@ -332,6 +521,8 @@ public class SemanticsAnalyzer {
 
 	private String existsInVariable(String token) {
 		token = token.substring(1);
+		
+		
 		for (Variable each : variableList) {
 			if (each.getInitialName().equals(token)) {
 				if (each.getContext().equals(currentContext))
@@ -390,8 +581,9 @@ public class SemanticsAnalyzer {
 		if (constantList.contains("const_" + value))
 			return;
 
+		
+		writeToConstFormatted(value);
 		constantList.add("const_" + value);
-		constantBuilder.append("const_" + value + "\tK\t=" + value + "\t; Adds constant " + value + "\n");
 
 	}
 
@@ -416,18 +608,14 @@ public class SemanticsAnalyzer {
 			if (each.getType().equals("int")) {
 
 				String decString = "=" + each.getValue();
-
-				builder.append(each.getFullName() + "\t" + "K" + "\t" + decString + "\t; nova variavel\n");
+				writeToVariableFormatted(each.getFullName(), decString, false);
 			} else if (each.getType().contains("vector")) {
 
 				int size = getVectorSize(each.getType());
-				builder.append(each.getFullName() + "\t" + "$" + "\t" + "=" + size + "\t; novo vetor\n");
+				writeToVariableFormatted(each.getFullName(), size + "", true);
 			}
 
 		}
-
-		variablesBuilder.append(builder.toString());
-
 		// System.out.println(builder.toString());
 
 	}
@@ -483,6 +671,7 @@ public class SemanticsAnalyzer {
 			throw new AssertionError("Ja contem variavel" + v.getFullName());
 
 		variableList.add(v);
+		writeToVariableFormatted(v.getFullName(), "=0", false);
 
 		// tokenStack.push(stackTop);
 		tokenStack.clear();
@@ -491,7 +680,7 @@ public class SemanticsAnalyzer {
 
 	}
 
-	private void writeGlobalVariables() {
+	/*private void writeGlobalVariables() {
 		List<Variable> vars = new ArrayList<>();
 
 		for (Variable each : variableList) {
@@ -502,7 +691,7 @@ public class SemanticsAnalyzer {
 
 		variableDeclaration(vars);
 
-	}
+	}*/
 
 	public String getGenCode() {
 		return genCode.toString();
@@ -520,7 +709,7 @@ public class SemanticsAnalyzer {
 
 		currentContext = subName;
 		
-		
+		genCode.append("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
 		writeToGenFormatted("sub_" + subName, "JP", "=0000", "Endereco de retorno");
 
 		functionNameStack.add("sub_" + subName);
@@ -546,13 +735,14 @@ public class SemanticsAnalyzer {
 				varType = t.toLowerCase();
 			}
 
-			paramName = currentContext + "_" + tokenStack.next();
+			String initialName = tokenStack.next();
+			paramName = currentContext + "_" + initialName;
 			writeToGenFormatted("", "SC", "POP", "Retira parametro da pilha");
 			writeToGenFormatted("", "MM", paramName, "Salva na variavel");
 
 			t = tokenStack.next();
 
-			Variable each = new Variable(paramName, "0", varType.toLowerCase());
+			Variable each = new Variable(initialName, "0", varType.toLowerCase());
 			each.setFullName(paramName);
 			each.setContext(currentContext);
 			buildFuncDataParam(each);
@@ -572,17 +762,14 @@ public class SemanticsAnalyzer {
 		StringBuilder builder = new StringBuilder();
 
 		if (each.getType().equals("int")) {
-
-			String decString = "=" + each.getValue();
-
-			builder.append(each.getFullName() + "\t" + "K" + "\t" + decString + "\t; nova variavel\n");
+			writeToFuncParamFormatted(each.getFullName(), "0", false);
 		} else if (each.getType().contains("vector")) {
 
 			int size = getVectorSize(each.getType());
-			builder.append(each.getFullName() + "\t" + "$" + "\t" + "=" + size + "\t; novo vetor\n");
+			writeToFuncParamFormatted(each.getFullName(), size + "", true);
 		}
 
-		funcParamBuilder.append(builder.toString());
+		//funcParamBuilder.append(builder.toString());
 
 		if (variableList.contains(each))
 			throw new AssertionError("Ja contem variavel" + each.getFullName());
@@ -596,18 +783,25 @@ public class SemanticsAnalyzer {
 	public void printCode() {
 
 		System.out.println("\n\n");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;Area de dados;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
-		System.out.println("; Variaveis\n");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Area de dados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		
+		System.out.println(";;;;;;;; Variaveis\n");
 		System.out.println(variablesBuilder.toString());
-		System.out.println("\n; Constantes\n");
+		
+		System.out.println("\n;;;;;;;; Constantes\n");
 		System.out.println(constantBuilder.toString());
-		System.out.println("\n; Funcoes\n");
+		
+		System.out.println("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Parametros de Funcoes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		
 		System.out.println(funcParamBuilder.toString());
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;Programa;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Programa;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 		System.out.println(genCode.toString());
 
 	}
@@ -648,8 +842,43 @@ public class SemanticsAnalyzer {
 	 */
 	
 	public void writeToGenFormatted(String label, String mneumonic, String operand, String comment) {		
-		String formatted = String.format("%-15s%2s%2s%5s%-15s%2s%-40s\n", label, "", mneumonic, "", operand, "", "; " + comment);
+		String formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "", mneumonic, "", operand, "", "; " + comment);
 		genCode.append(formatted);
+		
+	}
+	
+	
+	public void writeToConstFormatted(String value) {		
+		String formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", "const_" + value, "","K", "", "=" + value, "", "; Declara constante " + value);
+		constantBuilder.append(formatted);
+		
+	}
+	
+	public void writeToVariableFormatted(String label, String value, boolean vector) {		
+		String formatted;
+		
+		if(vector) {
+			 formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "","$", "", "=" + value, "", "; Declara vetor " + label);
+		} else {
+			formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "","K", "", value, "", "; Declara variavel " + label);
+		}
+		
+		
+		variablesBuilder.append(formatted);
+		
+	}
+	
+	public void writeToFuncParamFormatted(String label, String value, boolean vector) {		
+		String formatted;
+		
+		if(vector) {
+			 formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "","$", "", "=" + value, "", "; Declara vetor " + label);
+		} else {
+			formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "","K", "", "=" + value, "", "; Declara variavel " + label);
+		}
+		
+		
+		funcParamBuilder.append(formatted);
 		
 	}
 }

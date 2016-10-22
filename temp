@@ -16,3 +16,24 @@ BEGIN
             height := 1;
                   
 END 
+
+PROGRAM prog1;
+
+VAR height : INT;
+
+FUNCTION returnAge() ->
+            VAR age : INT;
+            age := 0;
+        
+	    RETURN age;        
+
+ENDFUNC
+
+
+BEGIN
+ 	    height := (5+2) * 3 + _height + 2;
+
+	    VAR width : INT;
+  	    width := 5 + 18 * (3 + _height);
+                  
+END 
