@@ -23,6 +23,8 @@ public class SemanticsAnalyzer {
 	private List<TokenStack> tempParamTokenStack = new ArrayList<>();
 	private String vectorAssignment1 = "";
 	private String vectorAssignment2 = "";
+	
+	private boolean isAssignmentVector = false;
 
 	private AssignmentStack assignmentStack = new AssignmentStack();
 
@@ -60,12 +62,10 @@ public class SemanticsAnalyzer {
 		// Declaracao de nova variavel
 		if (info.goingToMachine.equals("subVardecl") && info.goingToState.equals("5")
 				&& info.comingFromMachine.equals("subVardecl")) {
-			System.out.println("subVarDecl");
 			createVariable();
 
 			// Inicio da rotina principal
 		} else if (info.goingToMachine.equals("subProgram") && info.goingToState.equals("11")) {
-			System.out.println("subProgram");
 			//writeGlobalVariables();
 			// writeCode();
 
@@ -74,7 +74,6 @@ public class SemanticsAnalyzer {
 			// Declaracao de funcao
 		} else if (info.goingToMachine.equals("subFuncdecl") && info.goingToState.equals("11")
 				&& info.comingFromMachine.equals("subFuncdecl")) {
-			System.out.println("subFuncDecl");
 
 			createFuncDecl();
 			/*
@@ -95,13 +94,11 @@ public class SemanticsAnalyzer {
 
 			// Expressao inicio
 		} else if (info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("4")) {
-			System.out.println("subExp start");
 			treatExpressionStart();
 
 			// Expressao fim
 		} else if (info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("12")
 				&& !info.goingToMachine.equals("subExpression")) {
-			System.out.println("subExp end");
 			treatExpressionFinal();
 
 			/*
@@ -116,12 +113,10 @@ public class SemanticsAnalyzer {
 		// Inicio assignment
 		} else if (info.comingFromMachine.equals("subAssignment") && info.goingToState.equals("3")) {
 			assignmentFunctionStart();
-			System.out.println("subAssignment Start");
 
 		// Fim assignment
 		} else if (info.comingFromMachine.equals("subAssignment") && info.comingFromState.equals("9")) {
 			assignmentFunctionEnd();
-			System.out.println("subAssignment End");
 
 		// Condicional THEN
 		} else if (info.comingFromMachine.equals("subConditional") && info.comingFromState.equals("4")) {
@@ -171,11 +166,7 @@ public class SemanticsAnalyzer {
 
 	}
 
-	private void multiplosParametros() {
-		System.out.println("\n\n====MULTIPLOS PARAMETROS");
-		tokenStack.printStack();
-		System.out.println("==================\n\n");
-		
+	private void multiplosParametros() {		
 		String stackTop = tokenStack.pop();
 		tokenStack.pop();
 		tokenStack.clear();
@@ -184,11 +175,7 @@ public class SemanticsAnalyzer {
 		paramCounter++;
 	}
 
-	private void colocaSubRotinaNoStack() {
-		System.out.println("=============Subrotina start");
-		tokenStack.printStack();
-		System.out.println("==================");
-		
+	private void colocaSubRotinaNoStack() {		
 		String stackTop = tokenStack.pop();
 		
 		tokenStack.pop();
@@ -204,25 +191,23 @@ public class SemanticsAnalyzer {
 		
 	}
 
-	private void chamaSubRotina() {
-		System.out.println("=============Subrotina end");
-		tokenStack.printStack();
-		System.out.println("==================");
-		
+	private void chamaSubRotina() {		
 		if(paramCounter  > 1) {
-			writeToGenFormatted("", "", "", "");
+			writeToMsgFormatted("Inversao da pilha para chamada de sub-rotina");
 			for(int i = paramCounter; i > 0; i--) {
 				writeToGenFormatted("", "SC", "POP", "Retira da pilha original");
 				writeToGenFormatted("", "SC", "PARAM_PUSH", "Coloca na pilha de parametros");
 			}
 			
-			writeToGenFormatted("", "", "", "");
+			writeToFimMsgFormatted();
 			
 			paramCounter = 0;
 		}
 		
 		String funcName = subCallStack.remove(subCallStack.size() - 1);
+		writeToMsgFormatted("Chama sub-rotina");
 		writeToGenFormatted("", "SC", funcName, "Chama funcao " + funcName);
+		writeToFimMsgFormatted();
 		
 		String stackTop = tokenStack.pop();
 		tokenStack.clear();
@@ -234,21 +219,20 @@ public class SemanticsAnalyzer {
 	}
 
 	private void startWhile() {
+		writeToMsgFormatted("Inicia While");
 		writeToGenFormatted("start_while" + ++counter, "+", "const_0", "Inicia While");
 		counterStack.add(counter);
 	}
 
 	private void finalizaWhile() {
-		System.out.println("Finaliza While");
 		int count = counterStack.remove(counterStack.size() - 1);
 		writeToGenFormatted("", "JP", "start_while" + count, "Volta para o loop");
 		writeToGenFormatted("end_while_" + count, "+", "const_0", "Termina While");
+		writeToFimMsgFormatted();
 		
 		String stackTop = tokenStack.pop();
 		tokenStack.clear();
 		tokenStack.push(stackTop);
-
-		
 	}
 
 	private void meioWhile() {
@@ -279,7 +263,6 @@ public class SemanticsAnalyzer {
 	}
 
 	private void finalizaIF() {
-		System.out.println("Finaliza IF");
 		int index = flowStack.size() - 1;
 		
 		int count = counterStack.remove(counterStack.size() - 1);
@@ -291,6 +274,7 @@ public class SemanticsAnalyzer {
 		}
 		
 		writeToGenFormatted("end_if_" + count, "+", "const_0", "Termina IF");
+		writeToFimMsgFormatted();
 		
 		String stackTop = tokenStack.pop();
 		tokenStack.clear();
@@ -300,6 +284,7 @@ public class SemanticsAnalyzer {
 
 	private void escreveOperador(String operator) {
 		if(operator.equals("<")) {
+			writeToMsgFormatted("Comparacao <");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -310,8 +295,10 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0001", "Condicao verdadeira");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 			
 		} else if(operator.equals(">")) {
+			writeToMsgFormatted("Comparacao >");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -323,7 +310,9 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0000", "Condicao Falsa");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 		} else if(operator.equals(">=")) {
+			writeToMsgFormatted("Comparacao >=");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -334,7 +323,9 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0000", "Condicao Falsa");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 		} else if(operator.equals("<=")) {
+			writeToMsgFormatted("Comparacao <=");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -346,7 +337,9 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0001", "Condicao verdadeira");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 		} else if(operator.equals("==")) {
+			writeToMsgFormatted("Comparacao ==");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -357,7 +350,9 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0001", "Condicao verdadeira");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 		} else if(operator.equals("!=")) {
+			writeToMsgFormatted("Comparacao !=");
 			writeToGenFormatted("", "SC", "POP", "Pega primeiro parametro");
 			writeToGenFormatted("", "MM", "ARG", "Salva primeiro parametro");
 			writeToGenFormatted("", "SC", "POP", "Pega segundo parametro");
@@ -368,12 +363,12 @@ public class SemanticsAnalyzer {
 			counterOperators -= 2;
 			writeToGenFormatted("value_" + ++counterOperators, "LV", "=0000", "Condicao verdadeira");
 			writeToGenFormatted("value_" + ++counterOperators, "SC", "PUSH", "Coloca na pilha");
+			writeToFimMsgFormatted();
 		}
 		
 	}
 
 	private void escreveElse() {
-		System.out.println("ELSE Starts here");
 		
 		int count = counterStack.get(counterStack.size() - 1);
 		
@@ -394,7 +389,7 @@ public class SemanticsAnalyzer {
 		String operator = flowStack.remove(flowStack.size() - 1);
 		escreveOperador(operator);
 		
-		
+		writeToMsgFormatted("Inicia IF");
 		writeToGenFormatted("", "SC", "POP", "Busca resultado da comparacao");
 		writeToGenFormatted("", "JZ", "else_if_" + counter, "Vai para else se codicao falsa");
 		
@@ -406,7 +401,7 @@ public class SemanticsAnalyzer {
 		String functionName = functionNameStack.remove(functionNameStack.size() - 1);
 
 		writeToGenFormatted("", "RS", functionName, "Retorno de sub Rotina");
-		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		genCode.append("========================================================================================================================\n\n");
 	}
 
 	private void returnFunction() {
@@ -424,13 +419,16 @@ public class SemanticsAnalyzer {
 		String var = assignmentStack.pop();
 		
 		if(!vectorAssignment1.equals("") && !vectorAssignment2.equals("")) {
+			writeToMsgFormatted("Realizacao do assignment");
 			treatVectorAssignment(var);
 			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
 			dummyCount++;
 			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
 			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
 			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+			writeToFimMsgFormatted();
 		} else if(vectorAssignment1.equals("") && !vectorAssignment2.equals("")) {
+			writeToMsgFormatted("Inverte ordem da pilha");
 			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
@@ -439,6 +437,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
 			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
+			writeToFimMsgFormatted();
 			treatVectorAssignmentModificado(var, false, true);
 			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
 			dummyCount++;
@@ -446,6 +445,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
 			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
 		} else if(!vectorAssignment1.equals("") && vectorAssignment2.equals("")) {
+			writeToMsgFormatted("Inverte ordem da pilha");
 			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
@@ -454,16 +454,33 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
 			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
+			writeToFimMsgFormatted();
 			treatVectorAssignmentModificado(var, true, false);
+			writeToMsgFormatted("Realizacao do assignment");
 			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
 			dummyCount++;
 			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
 			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
 			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+			writeToFimMsgFormatted();
+		} else if(isAssignmentVector) {
+			writeToMsgFormatted("Realizacao do assignment");
+			treatVectorAssignmentModificado(var, false, false);
+			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
+			dummyCount++;
+			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
+			writeToGenFormatted("", "LD", "ARG_2", "Valor guardado a ser atribuido");
+			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+			writeToFimMsgFormatted();
 		} else  {
+			writeToMsgFormatted("Realizacao do assignment");
 			writeToGenFormatted("", "SC", "POP", "Retira valor da pilha");
 			writeToGenFormatted("", "MM", var, "Salva atribuicao na variavel");
+			writeToFimMsgFormatted();
 		}
+		
+		vectorAssignment1 = "";
+		vectorAssignment2 = "";
 	}
 
 	private void treatExpressionFinal() {
@@ -534,12 +551,7 @@ public class SemanticsAnalyzer {
 		// for(String each : rpnList) {
 		// System.out.println(each);
 		// }
-		
-		System.out.println("=============Treat expression");
-		tokenStack.printStack();
-		System.out.println("==================");
 
-		System.out.println();
 		writeExpressionASM(rpnList);
 		
 		
@@ -548,6 +560,7 @@ public class SemanticsAnalyzer {
 
 	private void writeExpressionASM(List<String> rpnList) {		
 
+		writeToMsgFormatted("Resolve expressao");
 		while (rpnList.size() > 0) {
 			String token = rpnList.remove(0);
 
@@ -574,6 +587,8 @@ public class SemanticsAnalyzer {
 			}
 
 		}
+		
+		writeToFimMsgFormatted();
 
 		tokenStack.clear();
 		
@@ -786,9 +801,9 @@ public class SemanticsAnalyzer {
 		String subName = tokenStack.next();
 
 		currentContext = subName;
-		genCode.append("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
-		genCode.append("Sub Rotina: " + subName.toUpperCase() + '\n');
-		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
+		genCode.append("\n;========================================================================================================================\n");
+		genCode.append(";Sub Rotina: " + subName.toUpperCase() + '\n');
+		genCode.append(";========================================================================================================================\n");
 		writeToGenFormatted("sub_" + subName, "JP", "=0000", "Endereco de retorno");
 
 		functionNameStack.add("sub_" + subName);
@@ -862,27 +877,27 @@ public class SemanticsAnalyzer {
 	public void printCode() {
 
 		System.out.println("\n\n");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println("AREA DE DADOS");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		System.out.println(";========================================================================================================================");
+		System.out.println(";AREA DE DADOS");
+		System.out.println(";========================================================================================================================\n\n");
 		
-		System.out.println(";;;;;;;; Variaveis\n");
+		printToMsgFormatted("Variaveis");
 		System.out.println(variablesBuilder.toString());
 		
-		System.out.println("\n;;;;;;;; Constantes\n");
+		printToMsgFormatted("Constantes");
 		System.out.println(constantBuilder.toString());
 		
-		System.out.println("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println("PARAMETROS");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		System.out.println("\n;========================================================================================================================");
+		System.out.println(";PARAMETROS");
+		System.out.println(";========================================================================================================================\n\n");
 		
 		System.out.println(funcParamBuilder.toString());
 		
-		System.out.println("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println("PROGRAMA");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
+		System.out.println("\n;========================================================================================================================");
+		System.out.println(";========================================================================================================================");
+		System.out.println(";PROGRAMA");
+		System.out.println(";========================================================================================================================");
+		System.out.println(";========================================================================================================================\n");
 		System.out.println(genCode.toString());
 
 	}
@@ -895,10 +910,6 @@ public class SemanticsAnalyzer {
 	}
 
 	private void assignmentFunctionStart() {
-		
-		System.out.println("\nAssignment=======================================");
-		tokenStack.printStack();
-		System.out.println("=======================================\n");
 		
 		String stackTop = tokenStack.pop();
 		// tokenStack.printStack();
@@ -928,8 +939,11 @@ public class SemanticsAnalyzer {
 				vectorAssignment1 = "_" + vectorAssignment1.substring(0, vectorAssignment1.length() - 1);
 			}
 			
+			isAssignmentVector = false;
+			
 			if(vectorAssignment1.contains("(")) {
 				vectorAssignment1 = "";
+				isAssignmentVector = true;
 			}
 			
 			if(vectorAssignment2.contains("_")) {
@@ -938,6 +952,7 @@ public class SemanticsAnalyzer {
 			
 			if(vectorAssignment2.contains("(")) {
 				vectorAssignment2 = "";
+				isAssignmentVector = true;
 			}
 			
 			tempVar = tokenStack.pop();
@@ -978,6 +993,37 @@ public class SemanticsAnalyzer {
 		
 	}
 	
+	public void writeToMsgFormatted(String msg) {
+		int l = msg.length();		
+		String formatted = "\n;" + msg;
+		
+		for(int i = l; i <= 119; i++) {
+			formatted = formatted + ";";
+		}
+		
+		formatted = formatted + "\n";
+		
+		genCode.append(formatted);
+	}
+	
+	public void printToMsgFormatted(String msg) {
+		int l = msg.length();		
+		String formatted = "\n;" + msg;
+		
+		for(int i = l; i <= 119; i++) {
+			formatted = formatted + ";";
+		}
+		
+		formatted = formatted + "\n";
+		
+		System.out.print(formatted);
+	}
+	
+	public void writeToFimMsgFormatted() {		
+		String formatted = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
+		genCode.append(formatted);
+	}
+	
 	public void writeToVariableFormatted(String label, String value, boolean vector) {		
 		String formatted;
 		
@@ -991,6 +1037,8 @@ public class SemanticsAnalyzer {
 		variablesBuilder.append(formatted);
 		
 	}
+	
+	
 	
 	public void writeToFuncParamFormatted(String label, String value, boolean vector) {		
 		String formatted;
@@ -1066,7 +1114,7 @@ public class SemanticsAnalyzer {
 		part2Converted = convertStringtoRPN(part2);
 		
 		writeExpressionASM(part1Converted);
-		
+		writeToMsgFormatted("Calculo posicao da linha");
 		writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
@@ -1075,9 +1123,11 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
 		writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
 		writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
-		writeSemiColonToGen();
+		writeToFimMsgFormatted();
+		writeToMsgFormatted("Calculo posicao da coluna");
 		writeExpressionASM(part2Converted);
-		writeSemiColonToGen();
+		writeToFimMsgFormatted();
+		writeToMsgFormatted("Escreve Load");
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
@@ -1091,6 +1141,7 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "MM", "lCode_" + dummyCount, "Salva codigo de load");
 		writeToGenFormatted("lCode_" + dummyCount, "K", "=0000", "Executa o load");
 		writeToGenFormatted("", "SC", "PUSH", "Envia valor para pilha");
+		writeToFimMsgFormatted();
 	}
 	
 	private void treatVectorAssignment(String fullName){
@@ -1098,7 +1149,7 @@ public class SemanticsAnalyzer {
 		List<String> part2Converted = convertStringtoRPN(vectorAssignment2);
 		
 		writeExpressionASM(part1Converted);
-		
+		writeToMsgFormatted("Calculo posicao da linha");
 		writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
@@ -1107,9 +1158,11 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
 		writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
 		writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
-		writeSemiColonToGen();
+		writeToFimMsgFormatted();
+		writeToMsgFormatted("Calculo posicao da coluna");
 		writeExpressionASM(part2Converted);
-		writeSemiColonToGen();
+		writeToFimMsgFormatted();
+		writeToMsgFormatted("Escreve o save");
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
@@ -1118,8 +1171,9 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
-		writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+		writeToGenFormatted("", "+", "const_9000", "Soma codigo de Save");
 		writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+		writeToFimMsgFormatted();
 	}
 	
 	private void treatVectorAssignmentModificado(String fullName, boolean part1, boolean part2){
@@ -1131,6 +1185,7 @@ public class SemanticsAnalyzer {
 			part1Converted = convertStringtoRPN(vectorAssignment1);
 			writeExpressionASM(part1Converted);
 			
+			writeToMsgFormatted("Calculo posicao da linha");
 			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
@@ -1139,7 +1194,8 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
 			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
 			writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
-			writeSemiColonToGen();
+			writeToFimMsgFormatted();
+			writeToMsgFormatted("Inversao da pilha");
 			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
@@ -1148,7 +1204,8 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
 			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
 			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
-			writeSemiColonToGen();
+			writeToFimMsgFormatted();
+			writeToMsgFormatted("Calculo do endereco para o save");
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
@@ -1157,11 +1214,42 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
-			writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+			writeToGenFormatted("", "+", "const_9000", "Soma codigo de Save");
 			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+			writeToFimMsgFormatted();
 			
 		} else if(part2) {
 			part2Converted = convertStringtoRPN(vectorAssignment2);
+			writeToMsgFormatted("Calculo posicao da linha");
+			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+			writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
+			writeToFimMsgFormatted();
+			writeToMsgFormatted("Calculo posicao da coluna");
+			writeExpressionASM(part2Converted);
+			writeToFimMsgFormatted();
+			writeToMsgFormatted("Calculo do endereco para o save");
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "+", "const_9000", "Soma codigo de Save");
+			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+		} else {
+			
+			writeToGenFormatted("", "SC", "POP", "Remove o resultado");
+			writeToGenFormatted("", "MM", "ARG_2", "Deixa em ARG_2");
+			writeToGenFormatted("", "SC", "POP", "Remove o valor da coluna");
+			writeToGenFormatted("", "MM", "ARG_3", "Deixa em ARG_3");
 			
 			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
@@ -1171,10 +1259,8 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
 			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
 			writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
-			writeSemiColonToGen();
-			writeExpressionASM(part2Converted);
-			writeSemiColonToGen();
-			writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+
+			writeToGenFormatted("", "LD", "ARG_3", "Retira o valor da coluna");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1182,13 +1268,13 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
-			writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+			writeToGenFormatted("", "+", "const_9000", "Soma codigo de Save");
 			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
 		}
 		
 	}
 	
 	public void writeSemiColonToGen() {
-		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
+		genCode.append(";========================================================================================================================\n");
 	}
 }
