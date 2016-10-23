@@ -1,6 +1,7 @@
 package semantics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SemanticsAnalyzer {
@@ -20,6 +21,8 @@ public class SemanticsAnalyzer {
 	private List<String> subCallStack = new ArrayList<>();
 	private List<Integer> paramStackExp = new ArrayList<>();
 	private List<TokenStack> tempParamTokenStack = new ArrayList<>();
+	private String vectorAssignment1 = "";
+	private String vectorAssignment2 = "";
 
 	private AssignmentStack assignmentStack = new AssignmentStack();
 
@@ -36,6 +39,8 @@ public class SemanticsAnalyzer {
 		writeToConstFormatted("0");
 		constantList.add("const_8000");
 		writeToConstFormatted("8000");
+		constantList.add("const_9000");
+		writeToConstFormatted("9000");
 	}
 
 	public void performOperation(TransitionInfo info) {
@@ -417,9 +422,48 @@ public class SemanticsAnalyzer {
 
 	private void assignmentFunctionEnd() {
 		String var = assignmentStack.pop();
-
-		writeToGenFormatted("", "SC", "POP", "Retira valor da pilha");
-		writeToGenFormatted("", "MM", var, "Salva atribuicao na variavel");
+		
+		if(!vectorAssignment1.equals("") && !vectorAssignment2.equals("")) {
+			treatVectorAssignment(var);
+			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
+			dummyCount++;
+			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
+			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
+			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+		} else if(vectorAssignment1.equals("") && !vectorAssignment2.equals("")) {
+			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
+			writeToGenFormatted("", "MM", "ARG_2", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "ARG", "Carrega topo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
+			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
+			treatVectorAssignmentModificado(var, false, true);
+			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
+			dummyCount++;
+			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
+			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
+			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+		} else if(!vectorAssignment1.equals("") && vectorAssignment2.equals("")) {
+			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
+			writeToGenFormatted("", "MM", "ARG_2", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "ARG", "Carrega topo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
+			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
+			treatVectorAssignmentModificado(var, true, false);
+			writeToGenFormatted("", "SC", "POP", "Instrucao de salvar");
+			dummyCount++;
+			writeToGenFormatted("", "MM", "mCode_" + dummyCount, "Salva comando de MM");
+			writeToGenFormatted("", "SC", "POP", "Valor guardado a ser atribuido");
+			writeToGenFormatted("mCode_" + dummyCount, "K", "=0000", "Executa o save");
+		} else  {
+			writeToGenFormatted("", "SC", "POP", "Retira valor da pilha");
+			writeToGenFormatted("", "MM", var, "Salva atribuicao na variavel");
+		}
 	}
 
 	private void treatExpressionFinal() {
@@ -526,33 +570,7 @@ public class SemanticsAnalyzer {
 					throw new AssertionError("Variavel nao existe");
 				}
 			} else if(isVector(token)) {
-				String fullName = existsInVariable(token);
-				int num1 = getNumVector(token, 1);
-				int num2 = getNumVector(token, 2);
-				if (fullName != null) {
-					writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
-					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
-					writeToGenFormatted("", "LV", "=" + num1, "Carrega valor da linha");
-					writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
-					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
-					writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
-					writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
-					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
-					writeToGenFormatted("", "LV", "=" + num2, "Carrega a coluna");
-					writeToGenFormatted("", "+", "ARG", "Realiza a soma");
-					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
-					writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
-					writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
-					writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
-					writeToGenFormatted("", "+", "ARG", "Realiza a soma");
-					writeToGenFormatted("", "+", "const_8000", "Soma codigo de load");
-					dummyCount++;
-					writeToGenFormatted("", "MM", "dummy_" + dummyCount, "Salva codigo de load");
-					writeToGenFormatted("dummy_" + dummyCount, "K", "=0000", "Executa o load");
-					writeToGenFormatted("", "SC", "PUSH", "Envia valor para pilha");
-				} else {
-					throw new AssertionError("Variavel nao existe");
-				}
+				treatVectorUse(token);
 			}
 
 		}
@@ -560,13 +578,6 @@ public class SemanticsAnalyzer {
 		tokenStack.clear();
 		
 
-	}
-
-	private int getNumVector(String token, int i) {
-		token = token.substring(token.indexOf('[') + 1, token.length() - 1);
-		String value = token.split(",")[i - 1];
-		
-		return Integer.parseInt(value);
 	}
 
 	private boolean isVector(String token) {
@@ -775,8 +786,9 @@ public class SemanticsAnalyzer {
 		String subName = tokenStack.next();
 
 		currentContext = subName;
-		
 		genCode.append("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
+		genCode.append("Sub Rotina: " + subName.toUpperCase() + '\n');
+		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
 		writeToGenFormatted("sub_" + subName, "JP", "=0000", "Endereco de retorno");
 
 		functionNameStack.add("sub_" + subName);
@@ -851,7 +863,7 @@ public class SemanticsAnalyzer {
 
 		System.out.println("\n\n");
 		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Area de dados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println("AREA DE DADOS");
 		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 		
 		System.out.println(";;;;;;;; Variaveis\n");
@@ -861,14 +873,16 @@ public class SemanticsAnalyzer {
 		System.out.println(constantBuilder.toString());
 		
 		System.out.println("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Parametros de Funcoes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println("PARAMETROS");
 		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
 		
 		System.out.println(funcParamBuilder.toString());
 		
+		System.out.println("\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
 		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Programa;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
-		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n");
+		System.out.println("PROGRAMA");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+		System.out.println(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
 		System.out.println(genCode.toString());
 
 	}
@@ -881,12 +895,55 @@ public class SemanticsAnalyzer {
 	}
 
 	private void assignmentFunctionStart() {
+		
+		System.out.println("\nAssignment=======================================");
+		tokenStack.printStack();
+		System.out.println("=======================================\n");
+		
 		String stackTop = tokenStack.pop();
 		// tokenStack.printStack();
 
 		tokenStack.pop();
+		
+		String tempVar = tokenStack.pop();
+		
+		if(tempVar.equals("]")) {
+			String t = tokenStack.pop();
+			int whichS = 2;
+			while(!t.equals("[")) {
+				if(!t.equals(",")) {
+					if(whichS == 2) {
+						vectorAssignment2 = vectorAssignment2 + t;
+					} else {
+						vectorAssignment1 = vectorAssignment1 + t;
+					}
+				} else {
+					whichS = 1;
+				}
+					
+				t = tokenStack.pop();
+			}
+			
+			if(vectorAssignment1.contains("_")) {
+				vectorAssignment1 = "_" + vectorAssignment1.substring(0, vectorAssignment1.length() - 1);
+			}
+			
+			if(vectorAssignment1.contains("(")) {
+				vectorAssignment1 = "";
+			}
+			
+			if(vectorAssignment2.contains("_")) {
+				vectorAssignment2 = "_" + vectorAssignment2.substring(0, vectorAssignment2.length() - 1);
+			}
+			
+			if(vectorAssignment2.contains("(")) {
+				vectorAssignment2 = "";
+			}
+			
+			tempVar = tokenStack.pop();
+		}
 
-		String var = existsInVariable("_" + tokenStack.pop());
+		String var = existsInVariable("_" + tempVar);
 
 		if (var == null)
 			throw new AssertionError("Variavel nao existe");
@@ -947,5 +1004,191 @@ public class SemanticsAnalyzer {
 		
 		funcParamBuilder.append(formatted);
 		
+	}
+	
+	private String getPartVector(String token, int i) {
+		token = token.substring(token.indexOf('[') + 1, token.length() - 1);
+		String value = token.split(",")[i - 1];
+		
+		return value;
+		
+	}
+	
+	private List<String> convertStringtoRPN(String expression) {
+		List<String> temp = new ArrayList<>();
+
+		for(int i = 0; i < expression.length(); i++) {
+			char ch = expression.charAt(i);
+			if(ch == '_') {
+				String c = "";
+				while(!isOperator(ch + "") && ch != ' ' && ch != '(' && ch != ')') {
+					c = c + ch;
+					
+					i++;
+					
+					if(i == expression.length())
+						break;
+					ch = expression.charAt(i);
+				}
+				
+				i--;
+				
+				temp.add(c);
+			} else if(ch != ' '){
+				temp.add(ch + "");
+			}
+		}
+		
+		RPNConverter tempConverter = new RPNConverter();
+		temp = tempConverter.convert(temp);
+		
+		/*System.out.println("\nVECTOR DECOMPOSE=======================================");
+		for(String each : temp) {
+			System.out.println(each);
+		}
+		System.out.println("=======================================\n");*/
+		
+		return temp;
+	}
+	
+	private void treatVectorUse(String token) throws AssertionError {
+		String fullName = existsInVariable(token);
+		
+		if(fullName == null) throw new AssertionError("Variavel nao existe");
+
+		String part1 = getPartVector(token, 1);
+		String part2 = getPartVector(token, 2);
+		
+		List<String> part1Converted;
+		List<String> part2Converted;
+		
+		part1Converted = convertStringtoRPN(part1);
+		part2Converted = convertStringtoRPN(part2);
+		
+		writeExpressionASM(part1Converted);
+		
+		writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
+		writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+		writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+		writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
+		writeSemiColonToGen();
+		writeExpressionASM(part2Converted);
+		writeSemiColonToGen();
+		writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
+		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+		writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+		writeToGenFormatted("", "+", "const_8000", "Soma codigo de load");
+		dummyCount++;
+		writeToGenFormatted("", "MM", "lCode_" + dummyCount, "Salva codigo de load");
+		writeToGenFormatted("lCode_" + dummyCount, "K", "=0000", "Executa o load");
+		writeToGenFormatted("", "SC", "PUSH", "Envia valor para pilha");
+	}
+	
+	private void treatVectorAssignment(String fullName){
+		List<String> part1Converted = convertStringtoRPN(vectorAssignment1);
+		List<String> part2Converted = convertStringtoRPN(vectorAssignment2);
+		
+		writeExpressionASM(part1Converted);
+		
+		writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
+		writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+		writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+		writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
+		writeSemiColonToGen();
+		writeExpressionASM(part2Converted);
+		writeSemiColonToGen();
+		writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
+		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+		writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+		writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+		writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+		writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+	}
+	
+	private void treatVectorAssignmentModificado(String fullName, boolean part1, boolean part2){
+		
+		List<String> part1Converted;
+		List<String> part2Converted = null;
+		
+		if(part1) {
+			part1Converted = convertStringtoRPN(vectorAssignment1);
+			writeExpressionASM(part1Converted);
+			
+			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+			writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
+			writeSemiColonToGen();
+			writeToGenFormatted("", "SC", "POP", "Inverte ordem da pilha");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira da pilha");
+			writeToGenFormatted("", "MM", "ARG_2", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "ARG", "Carrega topo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no fim");
+			writeToGenFormatted("", "LD", "ARG_2", "Pega o proximo");
+			writeToGenFormatted("", "SC", "PUSH", "Coloca no topo");
+			writeSemiColonToGen();
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+			
+		} else if(part2) {
+			part2Converted = convertStringtoRPN(vectorAssignment2);
+			
+			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira valor da linha");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+			writeToGenFormatted("", "SC", "PUSH", "Salva na pilha por equanto");
+			writeSemiColonToGen();
+			writeExpressionASM(part2Converted);
+			writeSemiColonToGen();
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da coluna");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "+", "const_9000", "Soma codigo de load");
+			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
+		}
+		
+	}
+	
+	public void writeSemiColonToGen() {
+		genCode.append(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n");
 	}
 }

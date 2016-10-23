@@ -1,0 +1,30 @@
+private void treatVectorUse(String token) throws AssertionError {
+		String fullName = existsInVariable(token);
+
+		int num1 = getNumVector(token, 1);
+		int num2 = getNumVector(token, 2);
+		if (fullName != null) {
+			writeToGenFormatted("", "LV", "=1", "Carrega valor 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", "=" + num1, "Carrega valor da linha");
+			writeToGenFormatted("", "-", "ARG", "Realiza subtracao");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LD", "max_" + fullName, "Carrega maximo de colunas");
+			writeToGenFormatted("", "*", "ARG", "Realiza a multiplicacao");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", "=" + num2, "Carrega a coluna");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
+			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
+			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
+			writeToGenFormatted("", "+", "const_8000", "Soma codigo de load");
+			dummyCount++;
+			writeToGenFormatted("", "MM", "lCode_" + dummyCount, "Salva codigo de load");
+			writeToGenFormatted("lCode_" + dummyCount, "K", "=0000", "Executa o load");
+			writeToGenFormatted("", "SC", "PUSH", "Envia valor para pilha");
+		} else {
+			throw new AssertionError("Variavel nao existe");
+		}
+	}
