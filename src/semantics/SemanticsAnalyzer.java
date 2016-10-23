@@ -46,69 +46,39 @@ public class SemanticsAnalyzer {
 	}
 
 	public void performOperation(TransitionInfo info) {
-		// if (semanticOperation.equals("subVardecl")) {
-		// createVariable();
-		// }
-		//
-		// if(semanticOperation.equals("begin")) {
-		// writeVariables();
-		// }
-
-		// Declaracao de nova variavel
-		// if(info.goingToMachine.equals("subProgram") &&
-		// info.goingToState.equals("7") &&
-		// info.comingFromMachine.equals("subVardecl")) {
 
 		// Declaracao de nova variavel
 		if (info.goingToMachine.equals("subVardecl") && info.goingToState.equals("5")
 				&& info.comingFromMachine.equals("subVardecl")) {
 			createVariable();
 
-			// Inicio da rotina principal
+		// Inicio da rotina principal
 		} else if (info.goingToMachine.equals("subProgram") && info.goingToState.equals("11")) {
-			//writeGlobalVariables();
-			// writeCode();
-
 			currentContext = "bgn";
 
-			// Declaracao de funcao
+		// Declaracao de funcao
 		} else if (info.goingToMachine.equals("subFuncdecl") && info.goingToState.equals("11")
 				&& info.comingFromMachine.equals("subFuncdecl")) {
 
 			createFuncDecl();
-			/*
-			 * } else if(info.comingFromMachine.equals("subExpression") &&
-			 * info.comingFromState.equals("12") &&
-			 * !info.goingToMachine.equals("subExpression")) {
-			 * solveExpression();
-			 */
 
-			// Retorno de funcao
+		// Retorno de funcao
 		} else if (info.comingFromMachine.equals("subFuncBlock") && info.comingFromState.equals("7")) {
 
 			returnFunction();
 
-			// Saida de funcao
+		// Saida de funcao
 		} else if (info.comingFromMachine.equals("subFuncBlock") && info.comingFromState.equals("9")) {
 			exitFunction();
 
-			// Expressao inicio
+		// Expressao inicio
 		} else if (info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("4")) {
 			treatExpressionStart();
 
-			// Expressao fim
+		// Expressao fim
 		} else if (info.comingFromMachine.equals("subExpression") && info.comingFromState.equals("12")
 				&& !info.goingToMachine.equals("subExpression")) {
 			treatExpressionFinal();
-
-			/*
-			 * } else if(info.comingFromMachine.equals("subCommand") &&
-			 * info.comingFromState.equals("2")) {
-			 * 
-			 * //assignmentFunction();
-			 * 
-			 * }
-			 */
 
 		// Inicio assignment
 		} else if (info.comingFromMachine.equals("subAssignment") && info.goingToState.equals("3")) {
@@ -151,11 +121,9 @@ public class SemanticsAnalyzer {
 		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("2")) {
 			colocaSubRotinaNoStack();
 			
-			
 			//Chamada de funcao, multiplos parametros
 		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("7")) {
 			multiplosParametros();
-			
 			
 		//Chamada de funcao fim	
 		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("9")) {
@@ -398,6 +366,10 @@ public class SemanticsAnalyzer {
 	}
 
 	private void exitFunction() {
+		String tTop = tokenStack.pop();
+		
+		tokenStack.clear();
+		tokenStack.push(tTop);
 		String functionName = functionNameStack.remove(functionNameStack.size() - 1);
 
 		writeToGenFormatted("", "RS", functionName, "Retorno de sub Rotina");

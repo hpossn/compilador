@@ -5,6 +5,10 @@ VAR height : INT;
 FUNCTION calcSoma(INT v1, INT v2) ->
 	VAR result : INT;
 	result := _v1 + _v2;
+
+	IF 1 < _v1 THEN
+		v2 := 2;
+	ENDIF
         
 	RETURN result;        
 ENDFUNC
