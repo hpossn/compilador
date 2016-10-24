@@ -906,6 +906,10 @@ public class SemanticsAnalyzer {
 	private void escreveInicio() {
 		
 		inicioBuilder.append("@ /0000\n");
+		writeToInicioFormatted("", "LV", "stack", "Carrega endereco de stack");
+		writeToInicioFormatted("", "MM", "stack_p", "Salva no ponteiro");
+		writeToInicioFormatted("", "LV", "param_stack", "Carrega endereco de stack");
+		writeToInicioFormatted("", "MM", "p_stack_p", "Salva no ponteiro");
 		writeToInicioFormatted("MAIN", "SC", "begin_program", "Vai para o inicio");
 		writeToInicioFormatted("END", "HM", "END", "Termina execucao");
 	}
@@ -1378,6 +1382,7 @@ public class SemanticsAnalyzer {
 		writeToStackFormatted("p_stack_p", "K", "=0000", "Ponteiros");
 		stackBuilder.append(";========================================================================================================================\n");
 
+		stackBuilder.append("#");
 	
 	}
 	
