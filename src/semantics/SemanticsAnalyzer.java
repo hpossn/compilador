@@ -7,6 +7,8 @@ import java.util.List;
 public class SemanticsAnalyzer {
 
 	private StringBuilder genCode = new StringBuilder();
+	private StringBuilder stackBuilder = new StringBuilder();
+	private StringBuilder inicioBuilder = new StringBuilder();
 	private StringBuilder funcParamBuilder = new StringBuilder();
 	private StringBuilder variablesBuilder = new StringBuilder();
 	private StringBuilder constantBuilder = new StringBuilder();
@@ -37,12 +39,17 @@ public class SemanticsAnalyzer {
 	private int dummyCount = 0;
 
 	public SemanticsAnalyzer() {
-		constantList.add("const_0");
-		writeToConstFormatted("0");
 		constantList.add("const_8000");
 		writeToConstFormatted("8000");
 		constantList.add("const_9000");
 		writeToConstFormatted("9000");
+		constantList.add("const_0");
+		writeToConstFormatted("0");
+		constantList.add("const_1");
+		writeToConstFormatted("1");
+		constantList.add("const_2");
+		writeToConstFormatted("2");
+		
 	}
 
 	public void performOperation(TransitionInfo info) {
@@ -55,6 +62,7 @@ public class SemanticsAnalyzer {
 		// Inicio da rotina principal
 		} else if (info.goingToMachine.equals("subProgram") && info.goingToState.equals("11")) {
 			currentContext = "bgn";
+			writeToGenFormatted("begin_program", "JP", "=0000", "Sub rotina principal");
 
 		// Declaracao de funcao
 		} else if (info.goingToMachine.equals("subFuncdecl") && info.goingToState.equals("11")
@@ -128,10 +136,22 @@ public class SemanticsAnalyzer {
 		//Chamada de funcao fim	
 		} else if(info.comingFromMachine.equals("subSubcall") && info.comingFromState.equals("9")) {
 			chamaSubRotina();
+			
+		//Final
+		} else if(info.comingFromMachine.equals("subComposite") && info.goingToState.equals("5")) {
+			finalizar();
+			
 		}
+		
+		
 
 		//System.out.println(info.toString());
 
+	}
+
+	private void finalizar() {
+		writeToGenFormatted("", "RS", "begin_program", "Finaliza e retorna");
+		
 	}
 
 	private void multiplosParametros() {		
@@ -846,8 +866,14 @@ public class SemanticsAnalyzer {
 
 	}
 
-	public void printCode() {
-
+	public void printCode() {		
+		System.out.println("\n\n");
+		System.out.println(";========================================================================================================================");
+		System.out.println(";INICIO");
+		System.out.println(";========================================================================================================================\n\n");
+		escreveInicio();
+		System.out.println(inicioBuilder.toString());
+		
 		System.out.println("\n\n");
 		System.out.println(";========================================================================================================================");
 		System.out.println(";AREA DE DADOS");
@@ -871,7 +897,23 @@ public class SemanticsAnalyzer {
 		System.out.println(";========================================================================================================================");
 		System.out.println(";========================================================================================================================\n");
 		System.out.println(genCode.toString());
+		
+		writeStack();
+		System.out.println(stackBuilder.toString());
 
+	}
+
+	private void escreveInicio() {
+		
+		inicioBuilder.append("@ /0000\n");
+		writeToInicioFormatted("MAIN", "SC", "begin_program", "Vai para o inicio");
+		writeToInicioFormatted("END", "HM", "END", "Termina execucao");
+	}
+
+	private void writeToInicioFormatted(String label, String mneumonic, String operand, String comment) {
+		String formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "", mneumonic, "", operand, "", "; " + comment);
+		inicioBuilder.append(formatted);
+		
 	}
 
 	private void solveExpression() {
@@ -1105,6 +1147,7 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
 		writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+		writeToGenFormatted("", "*", "const_2", "Multiplica por dois");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1140,6 +1183,7 @@ public class SemanticsAnalyzer {
 		writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
 		writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+		writeToGenFormatted("", "*", "const_2", "Multiplica por dois");
 		writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 		writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 		writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1183,6 +1227,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
 			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "*", "const_2", "Multiplica por dois");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1211,6 +1256,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
 			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "*", "const_2", "Multiplica por dois");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1237,6 +1283,7 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "POP", "Retira o valor da linha");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
 			writeToGenFormatted("", "-", "const_1", "Realiza subtracao de 1");
+			writeToGenFormatted("", "*", "const_2", "Multiplica por dois");
 			writeToGenFormatted("", "MM", "ARG", "Salva temporariamente");
 			writeToGenFormatted("", "LV", fullName, "Endereco do vetor");
 			writeToGenFormatted("", "+", "ARG", "Realiza a soma");
@@ -1244,6 +1291,94 @@ public class SemanticsAnalyzer {
 			writeToGenFormatted("", "SC", "PUSH", "Envia endereco de salvamento");
 		}
 		
+	}
+	
+	public void writeToStackFormatted(String label, String mneumonic, String operand, String comment) {		
+		String formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "", mneumonic, "", operand, "", "; " + comment);
+		stackBuilder.append(formatted);
+		
+	}
+	
+	public void writeStack() {
+		
+		stackBuilder.append("\n;========================================================================================================================\n");
+		stackBuilder.append(";Sub Rotina: PUSH\n");
+		stackBuilder.append(";========================================================================================================================\n");
+		writeToStackFormatted("t_psh", "K", "=0000", "Armazena parametro");
+		writeToStackFormatted("PUSH", "JP", "=0000", "Endereco de retorno");
+		writeToStackFormatted("", "MM", "t_psh", "Salva parametro");
+		writeToStackFormatted("", "LD", "const_9000", "Codigo de save");
+		writeToStackFormatted("", "+", "stack_p", "Ponteiro da pilha");
+		writeToStackFormatted("", "MM", "psh_w", "Salva para ser executado");
+		writeToStackFormatted("", "LD", "t_psh", "Carrega o valor");
+		writeToStackFormatted("psh_w", "K", "=0000", "Salva parametro");
+		writeToStackFormatted("", "LD", "stack_p", "Carrega ponteiro");
+		writeToStackFormatted("", "+", "const_2", "incrementa");
+		writeToStackFormatted("", "MM", "stack_p", "Salva parametro");
+		writeToStackFormatted("", "LD", "t_psh", "Deixa o valor no registrador");
+		writeToStackFormatted("", "RS", "PUSH", "Retorno");
+		stackBuilder.append(";========================================================================================================================\n");
+		
+		
+		stackBuilder.append("\n;========================================================================================================================\n");
+		stackBuilder.append(";Sub Rotina: POP\n");
+		stackBuilder.append(";========================================================================================================================\n");
+		writeToStackFormatted("POP", "JP", "=0000", "Endereco de retorno");
+		writeToStackFormatted("", "LD", "stack_p", "Carrega ponteiro");
+		writeToStackFormatted("", "-", "const_2", "Decrementa");
+		writeToStackFormatted("", "MM", "stack_p", "Salva valor");
+		writeToStackFormatted("", "LD", "const_8000", "Carrega codigo load");
+		writeToStackFormatted("", "+", "stack_p", "Soma com ponteiro");
+		writeToStackFormatted("", "MM", "pop_r", "Salva para executar");
+		writeToStackFormatted("pop_r", "K", "=0000", "Executa load");
+		writeToStackFormatted("", "RS", "POP", "Retorna");
+		stackBuilder.append(";========================================================================================================================\n");
+
+	
+		stackBuilder.append("\n;========================================================================================================================\n");
+		stackBuilder.append(";Sub Rotina: PARAM_PUSH\n");
+		stackBuilder.append(";========================================================================================================================\n");
+		writeToStackFormatted("param_psh", "K", "=0000", "Armazena parametro");
+		writeToStackFormatted("PARAM_PUSH", "JP", "=0000", "Endereco de retorno");
+		writeToStackFormatted("", "MM", "param_psh", "Salva parametro");
+		writeToStackFormatted("", "LD", "const_9000", "Codigo de save");
+		writeToStackFormatted("", "+", "p_stack_p", "Ponteiro da pilha");
+		writeToStackFormatted("", "MM", "p_psh_w", "Salva para ser executado");
+		writeToStackFormatted("", "LD", "param__psh", "Carrega o valor");
+		writeToStackFormatted("p_psh_w", "K", "=0000", "Salva parametro");
+		writeToStackFormatted("", "LD", "p_stack_p", "Carrega ponteiro");
+		writeToStackFormatted("", "+", "const_2", "incrementa");
+		writeToStackFormatted("", "MM", "p_stack_p", "Salva parametro");
+		writeToStackFormatted("", "LD", "param_psh", "Deixa o valor no registrador");
+		writeToStackFormatted("", "RS", "PARAM_PUSH", "Retorno");
+		stackBuilder.append(";========================================================================================================================\n");
+		
+		
+		stackBuilder.append("\n;========================================================================================================================\n");
+		stackBuilder.append(";Sub Rotina: PARAM_POP\n");
+		stackBuilder.append(";========================================================================================================================\n");
+		writeToStackFormatted("PARAM_POP", "JP", "=0000", "Endereco de retorno");
+		writeToStackFormatted("", "LD", "p_stack_p", "Carrega ponteiro");
+		writeToStackFormatted("", "-", "const_2", "Decrementa");
+		writeToStackFormatted("", "MM", "p_stack_p", "Salva valor");
+		writeToStackFormatted("", "LD", "const_8000", "Carrega codigo load");
+		writeToStackFormatted("", "+", "p_stack_p", "Soma com ponteiro");
+		writeToStackFormatted("", "MM", "p_pop_r", "Salva para executar");
+		writeToStackFormatted("p_pop_r", "K", "=0000", "Executa load");
+		writeToStackFormatted("", "RS", "PARAM_POP", "Retorna");
+		stackBuilder.append(";========================================================================================================================\n");
+
+		
+		stackBuilder.append("\n;========================================================================================================================\n");
+		stackBuilder.append(";AREA DE STACK\n");
+		stackBuilder.append(";========================================================================================================================\n");
+		writeToStackFormatted("stack", "$", "=300", "Area de stack");
+		writeToStackFormatted("stack_p", "K", "=0000", "Ponteiro");
+		writeToStackFormatted("param_stack", "$", "=100", "Area de stack para parametros");
+		writeToStackFormatted("p_stack_p", "K", "=0000", "Ponteiros");
+		stackBuilder.append(";========================================================================================================================\n");
+
+	
 	}
 	
 	public void writeSemiColonToGen() {
