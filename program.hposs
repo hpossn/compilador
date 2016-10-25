@@ -2,7 +2,19 @@ PROGRAM prog1;
 
 VAR height : INT;
 
+
+FUNCTION returnAge() ->
+            VAR age : INT;
+            age := 0;
+        
+	    RETURN age;        
+
+ENDFUNC
+
 BEGIN   
 	VAR result : VECTOR[3..3];
 	height[1, 3] := 5;
+	
+	VAR width : INT;
+  	width := 5 + 18 * (3 + _height) + _result[_height, 2];
 END 

@@ -880,6 +880,7 @@ public class SemanticsAnalyzer {
 		System.out.println(";========================================================================================================================\n\n");
 		
 		printToMsgFormatted("Variaveis");
+
 		System.out.println(variablesBuilder.toString());
 		
 		printToMsgFormatted("Constantes");
@@ -897,6 +898,8 @@ public class SemanticsAnalyzer {
 		System.out.println(";========================================================================================================================");
 		System.out.println(";========================================================================================================================\n");
 		System.out.println(genCode.toString());
+		
+		System.out.println("#");
 		
 		writeStack();
 		System.out.println(stackBuilder.toString());
@@ -1348,7 +1351,7 @@ public class SemanticsAnalyzer {
 		writeToStackFormatted("", "LD", "const_9000", "Codigo de save");
 		writeToStackFormatted("", "+", "p_stack_p", "Ponteiro da pilha");
 		writeToStackFormatted("", "MM", "p_psh_w", "Salva para ser executado");
-		writeToStackFormatted("", "LD", "param__psh", "Carrega o valor");
+		writeToStackFormatted("", "LD", "param_psh", "Carrega o valor");
 		writeToStackFormatted("p_psh_w", "K", "=0000", "Salva parametro");
 		writeToStackFormatted("", "LD", "p_stack_p", "Carrega ponteiro");
 		writeToStackFormatted("", "+", "const_2", "incrementa");
@@ -1381,9 +1384,10 @@ public class SemanticsAnalyzer {
 		writeToStackFormatted("param_stack", "$", "=100", "Area de stack para parametros");
 		writeToStackFormatted("p_stack_p", "K", "=0000", "Ponteiros");
 		stackBuilder.append(";========================================================================================================================\n");
-
-		stackBuilder.append("#");
 	
+		stackBuilder.append("\n");
+		writeToStackFormatted("ARG", "K", "=0000", "Variavel ARG");
+		writeToStackFormatted("ARG_2", "K", "=0000", "Variavel ARG_2");
 	}
 	
 	public void writeSemiColonToGen() {
