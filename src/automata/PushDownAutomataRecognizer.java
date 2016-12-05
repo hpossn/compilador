@@ -16,7 +16,7 @@ public class PushDownAutomataRecognizer {
 
 	public PushDownAutomataRecognizer(List<PushDownAutomata> subMachines, LexicalAnalyzer lexicalAnalyzer, boolean trace) {
 		//this.trace = trace;
-		this.trace = false;
+		this.trace = trace;
 		this.subMachines = subMachines;
 		this.lexicalAnalyzer = lexicalAnalyzer;
 	}
@@ -55,7 +55,7 @@ public class PushDownAutomataRecognizer {
 					keepGoing = false;
 				} else {
 					
-					String semanticOperation = currentMachine.getSubMachineName();
+
 					
 					TransitionInfo info = new TransitionInfo(currentMachine.getSubMachineName(),
 							"",

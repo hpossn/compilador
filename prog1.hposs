@@ -1,0 +1,26 @@
+PROGRAM prog1;
+
+VAR height : INT;
+
+
+FUNCTION returnPoints(INT vAge, INT vValue) ->
+      VAR points : INT;
+      points := 5 * (_vAge + 4 * (_vValue + 1));
+
+      RETURN points;
+ENDFUNC
+
+BEGIN
+      VAR result : INT;
+      VAR age : INT;
+
+      age := 5;
+
+      result := SUBCALL returnPoints(_age, 4);
+
+      IF _result >= 20 THEN
+        height := _result;
+      ELSE
+        height := _result - 5;
+      ENDIF
+END 

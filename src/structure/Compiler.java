@@ -18,9 +18,9 @@ public class Compiler {
 	public void initializeCompiler() {
 		printInitialMessage();
 		
-		String input;
-		//String input = scanner.nextLine();
-		//input.trim();
+		//String input;
+		String input = scanner.nextLine();
+		input.trim();
 		
 		int option = 1;
 		
@@ -36,17 +36,15 @@ public class Compiler {
 		
 		System.out.print("Digite o nome do arquivo de entrada: ");
 		
-		//String fileName = scanner.nextLine().trim();
-		String fileName = "program.hposs";
+		String fileName = scanner.nextLine().trim();
+		//String fileName = "program.hposs";
 
 		System.out.print("Ativar Trace (y/n): ");
 		
-		//input = scanner.nextLine().trim();
+		input = scanner.nextLine().trim();
 		//String input = "y";
-		boolean trace = true;
-		//boolean trace = false;
-		
-		input = "y";
+		//boolean trace = true;
+		boolean trace = false;
 		
 		switch(input) {
 		case "y":
@@ -80,7 +78,7 @@ public class Compiler {
         System.out.println("------------------------------------------------------------------------------------------------------------\n");
         System.out.print("Options\n");
         System.out.println("------------------------------------------------------------------------------------------------------------\n");
-        System.out.println("1: Arquivo de entrada - Linguagem HPOSS");
+        System.out.println("1: Compilar - Linguagem HPOSS");
         System.out.println("2: Analise de gramaticas em notacao de Wirth");
         System.out.println("3: Construir automato a partir de Wirth");
         System.out.println("4: Eliminar transicoes em vazio de automato");
@@ -91,7 +89,6 @@ public class Compiler {
 
 	private void startCompilation(String fileName, boolean trace) {
 		LexicalAnalyzer lexicalAnalyzer = null;
-		trace = false;
 //		System.out.print("Arquivo com transicoes (\"Enter\" para padrao): ");
 //		
 //		String ofile = scanner.nextLine().trim();

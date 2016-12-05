@@ -1,0 +1,44 @@
+PROGRAM prog4;
+
+VAR numVect : VECTOR[5..0];
+
+FUNCTION invert() ->
+      VAR inverted : VECTOR[5..0];
+      VAR counter : INT;
+      counter := 1;
+      
+      WHILE _counter <= 5 DO
+      	
+      	inverted[_counter, 1] := _numVect[(6 - _counter), 1];
+	
+	counter := _counter + 1;
+
+      ENDWHILE
+
+      counter := 1;
+
+      WHILE _counter <= 5 DO
+      	
+      	numVect[_counter, 1] := _inverted[_counter, 1];
+	
+	counter := _counter + 1;
+
+      ENDWHILE
+	
+ENDFUNC
+
+BEGIN
+      VAR counter : INT;
+
+      counter := 5;
+
+      WHILE _counter >= 1 DO
+      	numVect[_counter, 1] := _counter;
+	
+	counter := _counter - 1;
+
+      ENDWHILE
+
+      SUBCALL invert();
+
+END 

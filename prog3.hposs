@@ -1,0 +1,35 @@
+PROGRAM prog3;
+
+VAR numVect : VECTOR[5..2];
+
+
+FUNCTION multiMatrix() ->
+      VAR counter : INT;
+      counter := 1;
+      
+      WHILE _counter <= 5 DO
+      	
+      	numVect[_counter, 3] := _numVect[_counter, 1] * _numVect[_counter, 2];
+	
+	counter := _counter + 1;
+
+      ENDWHILE
+ENDFUNC
+
+BEGIN
+      VAR counter : INT;
+
+      counter := 5;
+
+      WHILE _counter >= 1 DO
+      	numVect[_counter, 1] := _counter;
+        numVect[_counter, 2] := _counter * _counter;
+        numVect[_counter, 3] := 0;
+	
+	counter := _counter - 1;
+
+      ENDWHILE
+
+      SUBCALL multiVector(8);
+
+END 

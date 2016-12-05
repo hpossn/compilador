@@ -1,7 +1,6 @@
 package semantics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SemanticsAnalyzer {
@@ -17,7 +16,6 @@ public class SemanticsAnalyzer {
 	private List<Variable> variableList = new ArrayList<>();
 	private List<String> constantList = new ArrayList<>();
 	private String currentContext = "gbl";
-	private List<String> contextStack = new ArrayList<>();
 	private List<String> functionNameStack = new ArrayList<>();
 	private List<String> flowStack = new ArrayList<>();
 	private List<String> subCallStack = new ArrayList<>();
@@ -670,12 +668,6 @@ public class SemanticsAnalyzer {
 
 	}
 
-	private void writeCode() {
-		// System.out.println(funcParamBuilder.toString());
-		// System.out.println(genCode.toString());
-
-	}
-
 	public void push(String token) {
 		tokenStack.push(token);
 	}
@@ -845,7 +837,6 @@ public class SemanticsAnalyzer {
 	}
 
 	public void buildFuncDataParam(Variable each) {
-		StringBuilder builder = new StringBuilder();
 
 		if (each.getType().equals("int")) {
 			writeToFuncParamFormatted(each.getFullName(), "0", false);
@@ -921,13 +912,6 @@ public class SemanticsAnalyzer {
 		String formatted = String.format("%-25s%2s%2s%5s%-15s%2s%-40s\n", label, "", mneumonic, "", operand, "", "; " + comment);
 		inicioBuilder.append(formatted);
 		
-	}
-
-	private void solveExpression() {
-		System.out.println("\n\nEXPRESSION!!!");
-		tokenStack.printStack();
-		tokenStack.clear();
-
 	}
 
 	private void assignmentFunctionStart() {

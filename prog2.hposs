@@ -1,0 +1,33 @@
+PROGRAM prog2;
+
+VAR numVect : VECTOR[5..0];
+
+
+FUNCTION multiVector(INT mult) ->
+      VAR counter : INT;
+      counter := 1;
+      
+      WHILE _counter <= 5 DO
+      	
+      	numVect[_counter, 1] := _numVect[_counter, 1] * _mult;
+	
+	counter := _counter + 1;
+
+      ENDWHILE
+ENDFUNC
+
+BEGIN
+      VAR counter : INT;
+
+      counter := 5;
+
+      WHILE _counter >= 1 DO
+      	numVect[_counter, 1] := _counter;
+	
+	counter := _counter - 1;
+
+      ENDWHILE
+
+      SUBCALL multiVector(8);
+
+END 

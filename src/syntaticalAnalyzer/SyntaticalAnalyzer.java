@@ -6,8 +6,6 @@ import automata.PushDownAutomata;
 import automata.PushDownAutomataRecognizer;
 import automata.PushDownTransitions;
 import lexicalAnalyzer.LexicalAnalyzer;
-import semantics.SemanticsAnalyzer;
-import semantics.SymbolTable;
 
 public class SyntaticalAnalyzer {
 
